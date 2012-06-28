@@ -1,8 +1,9 @@
 --- Shader
 --- ======
 
+local class = require 'class'
 local ffi = require 'ffi'
-local gl3 = mehve.gl3
+local gl = require 'gl'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
@@ -19,7 +20,7 @@ Shader._name = 'Shader'
 function Shader:_init(shader_type)
   assert(type(shader_type) == 'number')
   self._shader = gl_name()
-  self._shader.name = gl3.glCreateShader(shader_type)
+  self._shader.name = gl.glCreateShader(shader_type)
   ffi.gc(self._shader, function () self:delete() end)
 end
 
@@ -35,7 +36,7 @@ end
 --- sooner.
 function Shader:delete()
   if self._shader then
-    gl3.glDeleteShader(self._shader.name)
+    gl.glDeleteShader(self._shader.name)
     self._shader = false
   end
 end
@@ -56,25 +57,25 @@ function Shader:load_from_string(str)
 
   local source = ffi.new('const GLchar*[1]')
   source[0] = str
-  gl3.glShaderSource(shader_name, 1, source, nil)
-  gl3.glCompileShader(shader_name)
+  gl.glShaderSource(shader_name, 1, source, nil)
+  gl.glCompileShader(shader_name)
 
   -- get messages
   local msg
   local length = ffi.new('GLint[1]')
-  gl3.glGetShaderiv(shader_name, gl3.GL_INFO_LOG_LENGTH, length);
+  gl.glGetShaderiv(shader_name, gl.GL_INFO_LOG_LENGTH, length);
 
   -- if there was an error message then return it
   if length[0] > 1 then
     local log = ffi.new('GLchar[' .. length[0] .. ']')
-    gl3.glGetShaderInfoLog(shader_name, length[0], nil, log)
+    gl.glGetShaderInfoLog(shader_name, length[0], nil, log)
     msg = ffi.string(log)
   end
 
   -- error ?
   local shader_ok = ffi.new('GLint[1]')
-  gl3.glGetShaderiv(shader_name, gl3.GL_COMPILE_STATUS, shader_ok)
-  if shader_ok[0] == gl3.GL_FALSE then
+  gl.glGetShaderiv(shader_name, gl.GL_COMPILE_STATUS, shader_ok)
+  if shader_ok[0] == gl.GL_FALSE then
     if msg then
       return nil, 'shader compilation error: \n' .. msg
     else
@@ -88,18 +89,18 @@ function Shader:load_from_string(str)
     end
   end
 
-  --if shader_ok[0] == gl3.GL_FALSE then
+  --if shader_ok[0] == gl.GL_FALSE then
   --  -- report errors
   --  local msg = 'shader compilation error'
 
   --  -- get error length
   --  local length = ffi.new('GLint[1]')
-  --  gl3.glGetShaderiv(shader_name, gl3.GL_INFO_LOG_LENGTH, length);
+  --  gl.glGetShaderiv(shader_name, gl.GL_INFO_LOG_LENGTH, length);
 
   --  -- if there was an error message then print it
   --  if length[0] > 0 then
   --    local log = ffi.new('GLchar[' .. length[0] .. ']')
-  --    gl3.glGetShaderInfoLog(shader_name, length[0], nil, log)
+  --    gl.glGetShaderInfoLog(shader_name, length[0], nil, log)
   --    msg = msg .. ":\n" .. ffi.string(log)
   --  end
   --  return nil, msg

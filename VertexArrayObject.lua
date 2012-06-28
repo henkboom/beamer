@@ -1,5 +1,6 @@
+local class = require 'class'
 local ffi = require 'ffi'
-local gl3 = mehve.gl3
+local gl = require 'gl'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
@@ -13,7 +14,7 @@ function VertexArrayObject:_init()
   self._element_type = false
 
   local vertex_array_name = ffi.new('GLuint[1]')
-  gl3.glGenVertexArrays(1, vertex_array_name)
+  gl.glGenVertexArrays(1, vertex_array_name)
 
   self._vertex_array.name = vertex_array_name[0]
   ffi.gc(self._vertex_array, function () self:delete() end)
@@ -27,7 +28,7 @@ function VertexArrayObject:delete()
   if self._vertex_array then
     local vertex_array_name = ffi.new('GLuint[1]')
     vertex_array_name[0] = self._vertex_array.name
-    gl3.glDeleteVertexArrays(1, vertex_array_name)
+    gl.glDeleteVertexArrays(1, vertex_array_name)
     self._vertex_array = false
   end
 end
@@ -36,48 +37,48 @@ end
 
 function VertexArrayObject:draw(mode, first, count)
 
-  gl3.glBindVertexArray(self:get_name())
-  gl3.glDrawArrays(mode, first, count)
-  gl3.glBindVertexArray(0)
+  gl.glBindVertexArray(self:get_name())
+  gl.glDrawArrays(mode, first, count)
+  gl.glBindVertexArray(0)
 end
 
 function VertexArrayObject:draw_elements(mode, count)
-  gl3.glBindVertexArray(self:get_name())
-  gl3.glDrawElements(mode, count, self.element_type, nil)
-  gl3.glBindVertexArray(0)
+  gl.glBindVertexArray(self:get_name())
+  gl.glDrawElements(mode, count, self.element_type, nil)
+  gl.glBindVertexArray(0)
 end
 
 ---- elements -----------------------------------------------------------------
 
 function VertexArrayObject:set_element_array(buffer, element_type)
   assert(not buffer or
-         element_type == gl3.GL_UNSIGNED_BYTE or
-         element_type == gl3.GL_UNSIGNED_SHORT or
-         element_type == gl3.GL_UNSIGNED_INT)
+         element_type == gl.GL_UNSIGNED_BYTE or
+         element_type == gl.GL_UNSIGNED_SHORT or
+         element_type == gl.GL_UNSIGNED_INT)
   self.element_type = element_type
-  gl3.glBindVertexArray(self:get_name())
-  gl3.glBindBuffer(
-    gl3.GL_ELEMENT_ARRAY_BUFFER,
+  gl.glBindVertexArray(self:get_name())
+  gl.glBindBuffer(
+    gl.GL_ELEMENT_ARRAY_BUFFER,
     buffer and buffer:get_name() or 0)
-  gl3.glBindVertexArray(0)
+  gl.glBindVertexArray(0)
 end
 
 ---- attributes ---------------------------------------------------------------
 
 function VertexArrayObject:enable_attribute_array(index)
   assert(type(index) == 'number')
-  gl3.glBindVertexArray(self:get_name())
-  gl3.glEnableVertexAttribArray(index)
-  gl3.glBindVertexArray(0)
+  gl.glBindVertexArray(self:get_name())
+  gl.glEnableVertexAttribArray(index)
+  gl.glBindVertexArray(0)
 end
 
 function VertexArrayObject:set_attribute(index, x, y, z, w)
   assert(type(index) == 'number')
-  gl3.glBindVertexArray(self:get_name())
+  gl.glBindVertexArray(self:get_name())
   if index >= 0 then
-    gl3.glVertexAttrib4f(index, x or 0, y or 0, z or 0, w or 1)
+    gl.glVertexAttrib4f(index, x or 0, y or 0, z or 0, w or 1)
   end
-  gl3.glBindVertexArray(0)
+  gl.glBindVertexArray(0)
 end
 
 function VertexArrayObject:set_attribute_array(
@@ -85,20 +86,20 @@ function VertexArrayObject:set_attribute_array(
   assert(type(index) == 'number')
   assert(buffer)
   assert(size == 1 or size == 2 or size == 3 or size == 4 or
-         size == gl3.GL_BGRA)
+         size == gl.GL_BGRA)
   assert(element_type)
   normalized = normalized or true
   stride = stride or 0
   pointer = pointer or nil
 
-  gl3.glBindVertexArray(self:get_name())
+  gl.glBindVertexArray(self:get_name())
   if index >= 0 then
-    gl3.glBindBuffer(gl3.GL_ARRAY_BUFFER, buffer and buffer:get_name() or 0)
-    gl3.glVertexAttribPointer(
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, buffer and buffer:get_name() or 0)
+    gl.glVertexAttribPointer(
       index, size, element_type, normalized, stride, pointer)
-    gl3.glBindBuffer(gl3.GL_ARRAY_BUFFER, 0)
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER, 0)
   end
-  gl3.glBindVertexArray(0)
+  gl.glBindVertexArray(0)
 end
 
 return VertexArrayObject

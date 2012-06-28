@@ -1,8 +1,9 @@
 --- gl.buffer
 --- =========
 
+local class = require 'class'
 local ffi = require 'ffi'
-local gl3 = mehve.gl3
+local gl = require 'gl'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
@@ -22,7 +23,7 @@ function buffer:_init(target)
   self._buffer = gl_name()
 
   local buffer_name = ffi.new('GLuint[1]')
-  gl3.glGenBuffers(1, buffer_name)
+  gl.glGenBuffers(1, buffer_name)
 
   self._buffer.name = buffer_name[0]
   ffi.gc(self._buffer, function () self:delete() end)
@@ -38,7 +39,7 @@ function buffer:delete()
   if self._buffer then
     local buffer_name = ffi.new('GLuint[1]')
     buffer_name[0] = self._buffer.name
-    gl3.glDeleteBuffers(1, buffer_name)
+    gl.glDeleteBuffers(1, buffer_name)
     self._buffer = false
   end
 end
@@ -62,7 +63,7 @@ function buffer:set_data(data, usage)
   assert(self._buffer, 'buffer:set_data() called on deleted buffer')
   assert(type(data) == 'table' or type(data) == 'cdata')
   assert(usage == nil or type(usage) == 'number')
-  usage = usage or gl3.GL_STATIC_DRAW
+  usage = usage or gl.GL_STATIC_DRAW
 
   if type(data) == 'table' then
     local t = data
@@ -72,9 +73,9 @@ function buffer:set_data(data, usage)
     end
   end
 
-  gl3.glBindBuffer(self.target, self:get_name())
-  gl3.glBufferData(self.target, ffi.sizeof(data), data, usage)
-  gl3.glBindBuffer(self.target, 0)
+  gl.glBindBuffer(self.target, self:get_name())
+  gl.glBufferData(self.target, ffi.sizeof(data), data, usage)
+  gl.glBindBuffer(self.target, 0)
 end
 
 return buffer
