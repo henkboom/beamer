@@ -1,18 +1,30 @@
-local Game = require 'Game'
-local Video = require 'Video'
-local RenderList = require 'RenderList'
-local Camera = require 'Camera'
-local Transform = require 'Transform'
+require 'strict'
 
-local game = Game(
-  {'preupdate', 'update', 'postupdate'},
-  {'predraw', 'draw', 'postdraw'})
+local restarting = true
+local reload = require 'reload'
 
-game.video = Video(game)
-game.video:open_window()
+while restarting do
+  restarting = false
 
-game.render_list = RenderList()
-game.camera = Camera(game)
-game.camera.transform = Transform()
+  local glfw = require 'glfw'
+  local game = require('start')()
 
-game:start_game_loop()
+  local released = false
+  game.events.update:add_handler(function ()
+    if glfw.glfwGetKey(string.byte('`')) == glfw.GLFW_RELEASE then
+      released = true
+    end
+    if released and glfw.glfwGetKey(string.byte('`')) == glfw.GLFW_PRESS then
+      game:remove()
+      restarting = true
+    end
+  end)
+
+  game:start_game_loop()
+
+  if restarting then
+    local reload = require 'reload'
+    reload.reload()
+  end
+end
+

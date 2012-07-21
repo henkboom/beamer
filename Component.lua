@@ -4,8 +4,7 @@
 local class = require 'class'
 local Event = require 'Event'
 
-local Component = class()
-Component._name = 'Component'
+local Component = class('Component')
 
 function Component:_init(parent)
   self.game = parent.game
@@ -25,6 +24,9 @@ function Component:_init(parent)
 
   self.game:add_component(self)
 end
+
+-- optional method for subclasses
+Component._start = false
 
 function Component:remove()
   self.game:remove_component(self)

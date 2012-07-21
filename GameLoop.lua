@@ -6,7 +6,7 @@ local glfw = require 'glfw'
 -- Allow for this much inaccuracy in the OS sleep operation
 local sleep_error = 0.002
 
-local GameLoop = class()
+local GameLoop = class('GameLoop')
 
 function GameLoop:_init()
   self.target_framerate = 60

@@ -1,3 +1,6 @@
+--- VertexArrayObject
+--- =================
+
 local class = require 'class'
 local ffi = require 'ffi'
 local gl = require 'gl'
@@ -7,7 +10,6 @@ local gl_name = ffi.typeof('struct { GLuint name; }')
 ---- general ------------------------------------------------------------------
 
 local VertexArrayObject = class()
-VertexArrayObject._name = 'VertexArrayObject'
 
 function VertexArrayObject:_init()
   self._vertex_array = gl_name()
@@ -69,15 +71,6 @@ function VertexArrayObject:enable_attribute_array(index)
   assert(type(index) == 'number')
   gl.glBindVertexArray(self:get_name())
   gl.glEnableVertexAttribArray(index)
-  gl.glBindVertexArray(0)
-end
-
-function VertexArrayObject:set_attribute(index, x, y, z, w)
-  assert(type(index) == 'number')
-  gl.glBindVertexArray(self:get_name())
-  if index >= 0 then
-    gl.glVertexAttrib4f(index, x or 0, y or 0, z or 0, w or 1)
-  end
   gl.glBindVertexArray(0)
 end
 

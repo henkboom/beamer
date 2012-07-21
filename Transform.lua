@@ -2,8 +2,7 @@ local class = require 'class'
 local Vector = require 'Vector'
 local Quaternion = require 'Quaternion'
 
-local Transform = class()
-Transform._name = 'Transform'
+local Transform = class('Transform')
 
 function Transform:_init(position, orientation)
   self.position = position or Vector.zero

@@ -6,8 +6,7 @@ local Component = require 'Component'
 local Event = require 'Event'
 local GameLoop = require 'GameLoop'
 
-local Game = class(Component)
-Game._name = 'Game'
+local Game = class('Game', Component)
 
 function Game:_init(update_events, draw_events)
   self.game = self
@@ -103,13 +102,13 @@ function Game:_update()
     -- compact out dead components
     local dst = 1
     for src = 1, #self.components do
-      if not self.components[i].dead then
+      if not self.components[src].dead then
         self.components[dst] = self.components[src]
         dst = dst + 1
       end
     end
     for i = dst, #self.components do
-      components[i] = nil
+      self.components[i] = nil
     end
 
     if self.dead then

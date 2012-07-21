@@ -4,8 +4,7 @@
 local class = require 'class'
 local Component = require 'Component'
 
-local ComponentName = class(Component)
-ComponentName._name = 'ComponentName'
+local ComponentName = class('ComponentName', Component)
 
 function ComponentName:_init(parent)
   self:super(parent)

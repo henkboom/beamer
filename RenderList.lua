@@ -3,15 +3,14 @@
 
 local class = require 'class' 
 
-local RenderList = class()
-RenderList._name = 'RenderList'
+local RenderList = class('RenderList')
 
 function RenderList:_init(parent)
   self.jobs = {}
 end
 
 function RenderList:add_job(job)
-  order = order or 0
+  job.order = job.order or 0
 
   self.jobs[job] = true
 end

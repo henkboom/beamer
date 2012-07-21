@@ -8,8 +8,7 @@ local Matrix = require 'Matrix'
 local Vector = require 'Vector'
 local Quaternion = require 'Quaternion'
 
-Camera = class(Component)
-Camera._name = 'Camera'
+Camera = class('Camera', Component)
 
 local rotation_offset = Quaternion.from_rotation(Vector.j, -math.pi/2)
 

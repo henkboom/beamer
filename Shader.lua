@@ -7,8 +7,7 @@ local gl = require 'gl'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
-local Shader = class()
-Shader._name = 'Shader'
+local Shader = class('Shader')
 
 --- ### `Shader(shader_type)`
 --- Creates a new shader object with its own OpenGL handle. `shader_type`

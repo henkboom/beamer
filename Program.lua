@@ -7,8 +7,7 @@ local gl = require 'gl'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
-local Program = class()
-Program._name = 'Program'
+local Program = class('Program')
 
 Program._active_program = false
 
@@ -187,7 +186,7 @@ function Program:set_uniform_matrix(name, matrix)
     self:use()
 
     gl.glUniformMatrix4fv(
-      index, 1, false, matrix:to_reference())
+      index, 1, false, matrix:to_array_reference())
 
     if old_program then
       old_program:use()

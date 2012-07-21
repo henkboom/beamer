@@ -5,7 +5,7 @@
 
 local class = require 'class'
 
-local Event = class()
+local Event = class('Event')
 
 function Event:_init()
   self._count = 0 -- number of handlers

@@ -1,11 +1,10 @@
 local ffi = require 'ffi'
 
+require('reload').pin(...)
+
 local glfw = ffi.load('glfw')
 
--- TODO windows needs these
---    GLFWCALL =     __stdcall,
-
-ffi.cdef(string.gsub([[
+ffi.cdef((string.gsub([[
 /*************************************************************************
  * GLFW version
  *************************************************************************/
@@ -333,6 +332,6 @@ void glfwFreeImage( GLFWimage *img );
 int  glfwLoadTexture2D( const char *name, int flags );
 int  glfwLoadMemoryTexture2D( const void *data, long size, int flags );
 int  glfwLoadTextureImage2D( GLFWimage *img, int flags );
-]], 'GLFWCALL', ffi.os == 'Windows' and '__stdcall' or ''))
+]], 'GLFWCALL', ffi.os == 'Windows' and '__stdcall' or '')))
 
 return glfw
