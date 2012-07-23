@@ -31,7 +31,7 @@ function MeshRenderer:_start()
     'missing transform')
   assert(self.mesh, 'missing mesh')
 
-  local vertices = self.mesh[1].vertices
+  local vertices = self.mesh.vertices
 
   local position_list = {}
   for i = 1, #vertices do
@@ -43,7 +43,7 @@ function MeshRenderer:_start()
   local positions = BufferObject(gl.GL_ARRAY_BUFFER)
   positions:set_data(position_list)
 
-  local faces = self.mesh[1].faces
+  local faces = self.mesh.faces
   local element_list = {}
   local n = 1
   for i = 1, #faces do

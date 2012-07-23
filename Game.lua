@@ -9,6 +9,9 @@ local GameLoop = require 'GameLoop'
 local Game = class('Game', Component)
 
 function Game:_init(update_events, draw_events)
+  update_events = update_events or {'preupdate', 'update', 'postupdate'}
+  draw_events = draw_events or {'predraw', 'draw', 'postdraw'}
+
   self.game = self
 
   self._game_loop = false

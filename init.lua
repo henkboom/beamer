@@ -7,7 +7,7 @@ while restarting do
   restarting = false
 
   local glfw = require 'glfw'
-  local game = require('start')()
+  local game = require('Root')()
 
   local released = false
   game.events.update:add_handler(function ()

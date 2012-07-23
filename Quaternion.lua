@@ -101,7 +101,7 @@ function Quaternion.to_ijk_string(q)
 end
 
 function Quaternion.__tostring(q)
-  return string.format('q(%d + %di + %dj + %dk)', q.w, q.x, q.y, q.z)
+  return string.format('q(%f + %fi + %fj + %fk)', q.w, q.x, q.y, q.z)
 end
 
 ffi.metatype(quaternion_type, Quaternion)

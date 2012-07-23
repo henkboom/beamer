@@ -2,9 +2,7 @@ local Program = require 'Program'
 local Shader = require 'Shader'
 local gl = require 'gl'
 
-local basic = {}
-
-function basic.load()
+return function ()
   local vertex = Shader(gl.GL_VERTEX_SHADER)
   assert(vertex:load_from_string([=[
   #version 120
@@ -41,5 +39,3 @@ function basic.load()
   
   return program
 end
-
-return basic
