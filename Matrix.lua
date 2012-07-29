@@ -15,6 +15,10 @@ local Matrix = setmetatable({}, {
 
 Matrix.type = matrix_type
 
+function Matrix.is_type_of(value)
+  return ffi.istype(matrix_type, value)
+end
+
 function Matrix.from_transform(position, orientation, scale)
   assert(position, 'missing position')
   assert(orientation, 'missing orientation')

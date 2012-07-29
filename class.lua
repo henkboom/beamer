@@ -47,6 +47,10 @@ local function class(name, base)
     return str
   end
 
+  c.is_type_of = function (value)
+    return getmetatable(value) == c
+  end
+
   setmetatable(c, {
     __call = function (_, ...)
       local obj = setmetatable({}, c)

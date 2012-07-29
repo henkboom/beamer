@@ -164,13 +164,17 @@ function Program:set_uniform(name, x, y, z, w)
   local index = self:get_uniform_location(name)
 
   if index >= 0 then
-    local old_program = program._active_program
-    self:use()
+    local old_program = Program._active_program
+    if old_program ~= self then
+      self:use()
+    end
 
     gl.glUniform4f(index, x or 0, y or 0, z or 0, w or 1)
 
     if old_program then
-      old_program:use()
+      if old_program ~= self then
+        old_program:use()
+      end
     else
       self:disuse()
     end
@@ -183,13 +187,17 @@ function Program:set_uniform_matrix(name, matrix)
   
   if index >= 0 then
     local old_program = Program._active_program
-    self:use()
+    if old_program ~= self then
+      self:use()
+    end
 
     gl.glUniformMatrix4fv(
       index, 1, false, matrix:to_array_reference())
 
     if old_program then
-      old_program:use()
+      if old_program ~= self then
+        old_program:use()
+      end
     else
       self:disuse()
     end

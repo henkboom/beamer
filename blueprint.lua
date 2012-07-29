@@ -50,8 +50,8 @@ end
 
 local function blueprint(name, base, instructions)
   local blueprint_class = class(name, require(base))
-  function blueprint_class:_init(parent)
-    self:super(parent)
+  function blueprint_class:_init(...)
+    self:super(...)
     local context = setmetatable({self = self}, {__index = _G})
     for i = 1, #instructions do
       local instruction = instructions[i]

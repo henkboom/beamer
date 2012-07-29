@@ -11,6 +11,10 @@ local Vector = setmetatable({}, {
 Vector.__index = Vector
 Vector.type = vector_type
 
+function Vector.is_type_of(value)
+  return ffi.istype(vector_type, value)
+end
+
 function Vector.__add (a, b)
   return vector_type(a.x+b.x, a.y+b.y, a.z+b.z)
 end
