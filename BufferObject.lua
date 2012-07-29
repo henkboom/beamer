@@ -9,14 +9,15 @@ local gl_name = ffi.typeof('struct { GLuint name; }')
 
 local BufferObject = class('BufferObject')
 
---- ### `BufferObject()`
+--- ### `BufferObject(target[, data[, usage]])`
 --- Creates a new BufferObject object with its own OpenGL handle. `target`
 --- should be an opengl buffer type, such as `gl.GL_ARRAY_BUFFER` or
---- `gl.GL_ELEMENT_ARRAY_BUFFER`.
+--- `gl.GL_ELEMENT_ARRAY_BUFFER`. If `data` and/or `usage` are given then they
+--- are immediately passed to `set_data()`.
 ---
 --- The handle will be released when this object is garbage collected, but
 --- `buffer_object:delete()` can be called to delete it immediately.
-function BufferObject:_init(target)
+function BufferObject:_init(target, data, usage)
   assert(type(target) == 'number', 'invalid target given to BufferObject()')
   self.target = target
   self._buffer = gl_name()
@@ -26,6 +27,10 @@ function BufferObject:_init(target)
 
   self._buffer.name = buffer_name[0]
   ffi.gc(self._buffer, function () self:delete() end)
+
+  if data ~= nil then
+    self:set_data(data, usage)
+  end
 end
 
 --- ### `buffer_object:delete()`
@@ -50,7 +55,7 @@ function BufferObject:get_name()
   return self._buffer and self._buffer.name
 end
 
---- ### `buffer_object:set_data(data, usage = gl.GL_STATIC_DRAW)
+--- ### `buffer_object:set_data(data, [usage = gl.GL_STATIC_DRAW])
 --- Sets the buffer data. `data` is the data to be copied by OpenGL, either a
 --- table-array of numbers or a cdata. `usage` should be any combination of
 --- `gl.GL_`{`STREAM`, `STATIC`, `DYNAMIC`}`_`{`DRAW`, `READ`, `COPY`}.
