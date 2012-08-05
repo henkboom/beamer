@@ -1701,7 +1701,7 @@ setmetatable(gl, {
           local ret = fn(...)
           local err = gl.glGetError()
           if err ~= gl.GL_NO_ERROR then
-            error('gl error ' .. err)
+            error('gl error ' .. string.format("0x%x", err))
           end
           return ret
         end
