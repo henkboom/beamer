@@ -24,9 +24,9 @@ function Video:_init(parent)
 
   self:add_handler_for('postdraw')
 
-  self.removed:add_handler(function ()
-    glfw.glfwCloseWindow()
-  end)
+  --self.removed:add_handler(function ()
+  --  glfw.glfwCloseWindow()
+  --end)
 end
 
 function Video:postdraw()

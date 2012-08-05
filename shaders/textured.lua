@@ -9,7 +9,6 @@ return function ()
    
   uniform mat4 projection;
   uniform mat4 modelview;
-  
   attribute vec3 position;
   attribute vec2 tex_coord;
 

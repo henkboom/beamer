@@ -793,6 +793,7 @@ local function warning_fn(png_ptr, message)
   io.stderr:write(ffi.string(message) .. '\n')
 end
 
+-- returns image, width, height, channels | nil, error_message
 function png.load(filename)
   local file
   local png_ptr

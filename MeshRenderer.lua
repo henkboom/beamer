@@ -10,6 +10,7 @@ local Matrix = require 'Matrix'
 local Program = require 'Program'
 local RenderJob = require 'RenderJob'
 local Shader = require 'Shader'
+local Texture = require 'Texture'
 local Vector = require 'Vector'
 local VertexArrayObject = require 'VertexArrayObject'
 
@@ -56,19 +57,20 @@ function MeshRenderer:_render(camera)
 
   -- uniforms
   for name, value in pairs(self._uniforms) do
-    if type('value') == 'number' then
+    if type(value) == 'number' then
       self.program:set_uniform(name, value)
-    elseif type('value') == 'table' then
-      self.program:set_uniform(name, value[1], value[2], value[3], value[4])
     elseif Vector.is_type_of(value) then
       self.program:set_uniform(name, value.x, value.y, value.z)
     elseif Matrix.is_type_of(value) then
       self.program:set_uniform_matrix(name, value)
     elseif Texture.is_type_of(value) then
       assert(next_texture_unit < max_texture_units, 'too many texture units used')
-      glActiveTexture(gl.GL_TEXTURE0 + next_texture_unit)
+      gl.glActiveTexture(gl.GL_TEXTURE0 + next_texture_unit)
       value:bind()
+      self.program:set_uniform_texture(name, next_texture_unit)
       next_texture_unit = next_texture_unit + 1
+    elseif type(value) == 'table' then
+      self.program:set_uniform(name, value[1], value[2], value[3], value[4])
     end
   end
 
@@ -95,8 +97,8 @@ function MeshRenderer:_render(camera)
     gl.glDisableVertexAttribArray(attribute_indices[i])
   end
   for i = 0, next_texture_unit - 1 do
-    glActiveTexture(gl.GL_TEXTURE0 + next_texture_unit)
-    glBindTexture(gl.GL_TEXTURE_2D, 0)
+    gl.glActiveTexture(gl.GL_TEXTURE0 + next_texture_unit)
+    gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
   end
 
   self.program:disuse()

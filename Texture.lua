@@ -21,9 +21,9 @@ function Texture:_init(target)
   self._texture = gl_name()
 
   local texture_name = ffi.new('GLuint[1]')
-  gl.glGenTextures(1, buffer_name)
+  gl.glGenTextures(1, texture_name)
 
-  self._texture.name = buffer_name[0]
+  self._texture.name = texture_name[0]
   ffi.gc(self._texture, function () self:delete() end)
 end
 
@@ -72,14 +72,16 @@ end
 ---   either 3 or 4.
 function Texture:set_data(image, width, height, channels)
   assert(self._texture, 'texture:set_data() called on deleted texture')
-  assert(type(data) == 'cdata')
-  assert(width and width > 0)
-  assert(height and height > 0)
+  assert(type(image) == 'cdata')
+  assert(type(width) == 'number' and width > 0)
+  assert(type(height) == 'number' and height > 0)
   assert(channels and (channels == 3 or channels == 4))
 
   local format = channels == 3 and gl.GL_RGB or gl.GL_RGBA
 
   gl.glBindTexture(self.target, self:get_name())
+  gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
+  gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
   gl.glTexImage2D(
     self.target, 0, format, width, height, 0, format, gl.GL_UNSIGNED_BYTE, image)
   gl.glBindTexture(self.target, 0)

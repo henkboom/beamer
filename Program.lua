@@ -159,6 +159,28 @@ function Program:get_uniform_location(name)
   end
 end
 
+function Program:set_uniform_texture(name, unit)
+  assert(type(name) == 'string' or type(name) == 'number')
+  local index = self:get_uniform_location(name)
+
+  if index >= 0 then
+    local old_program = Program._active_program
+    if old_program ~= self then
+      self:use()
+    end
+
+    gl.glUniform1i(index, unit)
+
+    if old_program then
+      if old_program ~= self then
+        old_program:use()
+      end
+    else
+      self:disuse()
+    end
+  end
+end
+
 function Program:set_uniform(name, x, y, z, w)
   assert(type(name) == 'string' or type(name) == 'number')
   local index = self:get_uniform_location(name)

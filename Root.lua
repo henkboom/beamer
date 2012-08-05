@@ -9,11 +9,12 @@ return blueprint('Root', 'Game', {
   {'self.camera.transform', {'Transform',
     {'Vector', 0, 0, 2},
     {Quaternion.from_rotation(Vector.j, math.pi/2)}}},
-  {'self.dummy_renderer', {'MeshRenderer', 'self'}},
-  {'self.dummy_renderer.transform', {'Transform'}},
-  {'self.dummy_renderer.program', {'shaders.basic'}},
-  {'self.dummy_renderer.mesh', {'Mesh', {{
-    elements = {1, 2, 3},
-    position = {0,0,0, 2,0,0, 0,1,0}
-  }}}}
+  {'self.text', {'TextRenderer', 'self'}},
+  --{'self.dummy_renderer', {'MeshRenderer', 'self'}},
+  --{'self.dummy_renderer.transform', {'Transform'}},
+  --{'self.dummy_renderer.program', {'shaders.basic'}},
+  --{'self.dummy_renderer.mesh', {'Mesh', {{
+  --  elements = {0, 1, 2},
+  --  position = {0,0,0, 2,0,0, 0,1,0}
+  --}}}}
 })
