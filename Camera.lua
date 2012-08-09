@@ -39,6 +39,8 @@ function Camera:draw()
   gl.glClearColor(0, 0, 0, 0)
   gl.glClear(gl.GL_COLOR_BUFFER_BIT + gl.GL_DEPTH_BUFFER_BIT)
   gl.glEnable(gl.GL_DEPTH_TEST)
+  gl.glEnable(gl.GL_BLEND)
+  gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
   gl.glDepthFunc(gl.GL_LESS)
   local jobs = {}
   for i = 1, #self.render_lists do

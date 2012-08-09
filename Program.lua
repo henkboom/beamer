@@ -191,7 +191,11 @@ function Program:set_uniform(name, x, y, z, w)
       self:use()
     end
 
-    gl.glUniform4f(index, x or 0, y or 0, z or 0, w or 1)
+    if y == nil then
+      gl.glUniform1f(index, x or 0)
+    else
+      gl.glUniform4f(index, x or 0, y or 0, z or 0, w or 1)
+    end
 
     if old_program then
       if old_program ~= self then
