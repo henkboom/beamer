@@ -9,16 +9,23 @@ local Vector = require 'Vector'
 
 local matrix_type = ffi.typeof('struct { float n[16]; }')
 
+--- ### `Matrix()`
+--- Returns a new zero-matrix. Not really useful for external use.
 local Matrix = setmetatable({}, {
   __call = function (...) return matrix_type(...) end
 })
 
 Matrix.type = matrix_type
 
+--- ### `Matrix.is_type_of(value)`
+--- Returns `true` if `value` is a `Matrix` object, `false` otherwise.
 function Matrix.is_type_of(value)
   return ffi.istype(matrix_type, value)
 end
 
+--- ### `Matrix.from_transform(position, orientation, scale = Vector(1, 1, 1))`
+--- Creates a matrix from the given transform. `position` and `scale` are
+--- `Vector` objects, and `orientation` should be a `Quaternion`.
 function Matrix.from_transform(position, orientation, scale)
   assert(position, 'missing position')
   assert(orientation, 'missing orientation')
@@ -54,6 +61,27 @@ function Matrix.from_transform(position, orientation, scale)
   return m
 end
 
+function Matrix.orthographic(left, right, bottom, top, near, far)
+  local m = Matrix()
+
+  local width = right - left
+  local height = top - bottom
+  local depth = far - near
+
+  -- scale
+  m.n[0] = 2/width
+  m.n[5] = 2/height
+  m.n[10] = -2/depth
+
+  -- translation
+  m.n[12] = (right + left) / width
+  m.n[13] = (top + bottom) / height
+  m.n[14] = (near + far) / depth
+
+  m.n[15] = 1
+  return m
+end
+
 function Matrix.perspective(fov_y, aspect, near, far)
   local m = Matrix()
 
@@ -64,13 +92,6 @@ function Matrix.perspective(fov_y, aspect, near, far)
   m.n[10] = (near+far)/(near-far)
   m.n[11] = -1
   m.n[14] = (2*far*near)/(near-far)
-
-  --local top = near * math.tan(fov_y/2)
-  --m.n[0] = near/(aspect * top)
-  --m.n[5] = near/top
-  --m.n[10] = -(far+near)/(far-near)
-  --m.n[11] = -1
-  --m.n[14] = -(2*far*near)/(far-near)
 
   return m
 end
@@ -152,6 +173,10 @@ function Matrix.__index(m, i)
   else
     return Matrix[i]
   end
+end
+
+function Matrix.__newindex(m, k, v)
+  error('can\'t modify immutable matrix', 2)
 end
 
 function Matrix.to_array_reference(m)
