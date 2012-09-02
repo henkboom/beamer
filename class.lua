@@ -34,7 +34,7 @@ local function class(name, base)
     c.__index = function (obj, k)
       local val = c[k]
       if val == nil then
-        error('field ' .. tostring(k) .. ' is not declared on ' .. tostring(obj))
+        error('field ' .. tostring(k) .. ' is not declared on ' .. tostring(obj), 2)
       end
       return val
     end

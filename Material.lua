@@ -55,6 +55,8 @@ function Material:_init()
 end
 
 function Material:render(mesh)
+  assert(self.program, 'missing program on material')
+
   -- bind the shader program
   self.program:use()
 

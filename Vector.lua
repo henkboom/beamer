@@ -58,15 +58,15 @@ function Vector.cross (a, b)
 end
 
 function Vector.project(a, b)
-  return b * (dot(a, b) / sqrmag(b))
+  return b * (Vector.dot(a, b) / Vector.square_magnitude(b))
 end
 
 function Vector.magnitude (v)
-  return math.sqrt(sqrmag(v))
+  return math.sqrt(Vector.square_magnitude(v))
 end
 
 function Vector.square_magnitude(v)
-  return dot(v, v)
+  return Vector.dot(v, v)
 end
 
 function Vector.normalized (v)

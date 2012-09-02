@@ -55,7 +55,10 @@ local function blueprint(name, base, instructions)
     local context = setmetatable({self = self}, {__index = _G})
     for i = 1, #instructions do
       local instruction = instructions[i]
-      assert(#instruction == 2, 'wrong number of elements in instruction')
+      if #instruction ~= 2 then
+        error('wrong number of elements in instruction '
+              .. i .. ' of "' .. name .. '"')
+      end
       assign(context, parse_address(instruction[1]), eval(context, instruction[2]))
     end
   end

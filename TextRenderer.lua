@@ -5,6 +5,7 @@ local class = require 'class'
 local Component = require 'Component'
 local gl = require 'gl'
 local png = require 'png'
+local Material = require 'Material'
 local Mesh = require 'Mesh'
 local MeshRenderer = require 'MeshRenderer'
 local font = require 'font'
@@ -27,7 +28,6 @@ function TextRenderer:set_text(str)
   local elements = {}
   local position = {}
   local tex_coord = {}
-
 
   local index = 0
   local pos = Vector.zero
@@ -78,7 +78,10 @@ function TextRenderer:_init(parent)
 
   self._renderer = MeshRenderer(self)
   self._renderer.transform = Transform()
-  self._renderer.program = text_shader()
+  self._renderer.material = Material()
+  self._renderer.material.blend_src = 'src_alpha'
+  self._renderer.material.blend_dst = 'one_minus_src_alpha'
+  self._renderer.material.program = text_shader()
   self._renderer.mesh = Mesh({
     elements = {0,1,2, 2,3,0},
     position = {0,0,0, 1,0,0, 1,1,0, 0,1,0},
@@ -88,10 +91,10 @@ function TextRenderer:_init(parent)
 
   local tex = Texture(gl.GL_TEXTURE_2D)
   tex:set_data(assert(png.load('font.png')))
-  self._renderer._uniforms.tex = tex
-  self._renderer._uniforms.color = {1, 1, 1, 1}
-  self._renderer._uniforms.inner_threshold = 0.75
-  self._renderer._uniforms.outer_threshold = 0.25
+  self._renderer.material.uniforms.tex = tex
+  self._renderer.material.uniforms.color = {1, 1, 1, 1}
+  self._renderer.material.uniforms.inner_threshold = 0.75
+  self._renderer.material.uniforms.outer_threshold = 0.25
 end
 
 return TextRenderer

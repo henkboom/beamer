@@ -7,14 +7,14 @@ return blueprint('Root', 'Game', {
   {'self.render_list', {'RenderList'}},
   {'self.camera', {'Camera', 'self'}},
   {'self.camera.transform', {'Transform',
-    {'Vector', 0, 0, 2},
-    {Quaternion.from_rotation(Vector.j, math.pi/2)}}},
+    {'Vector', 0, 0, 0},
+    {Quaternion.from_rotation(Vector.j, math.pi/4) *
+     Quaternion.from_rotation(Vector.i, -math.pi/6)
+   }}},
+  {'self.camera.near_clipping_plane', -100},
+  {'self.camera.far_clipping_plane', 100},
+  {'self.camera.projection_mode', '"orthographic"'},
+  {'self.camera.orthographic_height', 30},
+  {'self.player_ship', {'PlayerShip', 'self'}},
   {'self.text', {'TextRenderer', 'self'}},
-  --{'self.dummy_renderer', {'MeshRenderer', 'self'}},
-  --{'self.dummy_renderer.transform', {'Transform'}},
-  --{'self.dummy_renderer.program', {'shaders.basic'}},
-  --{'self.dummy_renderer.mesh', {'Mesh', {{
-  --  elements = {0, 1, 2},
-  --  position = {0,0,0, 2,0,0, 0,1,0}
-  --}}}}
 })
