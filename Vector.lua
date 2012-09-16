@@ -58,7 +58,7 @@ function Vector.cross (a, b)
 end
 
 function Vector.project(a, b)
-  return b * (Vector.dot(a, b) / Vector.square_magnitude(b))
+  return b * (Vector.dot(a, b) / Vector.dot(b, b))
 end
 
 function Vector.magnitude (v)

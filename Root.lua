@@ -10,11 +10,19 @@ return blueprint('Root', 'Game', {
     {'Vector', 0, 0, 0},
     {Quaternion.from_rotation(Vector.j, math.pi/4) *
      Quaternion.from_rotation(Vector.i, -math.pi/6)
-   }}},
+  }}},
   {'self.camera.near_clipping_plane', -100},
   {'self.camera.far_clipping_plane', 100},
   {'self.camera.projection_mode', '"orthographic"'},
   {'self.camera.orthographic_height', 30},
   {'self.player_ship', {'PlayerShip', 'self'}},
-  {'self.text', {'TextRenderer', 'self'}},
+  --{'self.text', {'TextRenderer', 'self'}},
+  {'self.wall', {'TrackWall', 'self'}},
+  {'self.wall.transform', {'Transform'}},
+  {'self.wall.curve', {'BezierCurve',
+    {'Vector', 0, 0, 0},
+    {'Vector', 32, 0, 0},
+    {'Vector', 64, 32, 0},
+    {'Vector', 64, 64, 0},
+  }},
 })

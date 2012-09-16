@@ -1,9 +1,10 @@
 --- BezierCurve
 --- ===========
+---
+--- An implementation of quadratic Bezier curves.
 
 local class = require 'class'
 
--- for now only deals with quadratic bezier curves
 local BezierCurve = class('BezierCurve')
 
 function BezierCurve:_init(p0, p1, p2, p3)
@@ -24,15 +25,30 @@ function BezierCurve:subdivide(t)
   local p01 =   self.p0 * invt + self.p1 * t
   local p12 =   self.p1 * invt + self.p2 * t
   local p23 =   self.p2 * invt + self.p3 * t
-  local p012 =  p01 * invt +     p12 * t
-  local p123 =  p12 * invt +     p23 * t
-  local p0123 = p012 * invt +    p123 * t
+  local p012 =      p01 * invt +     p12 * t
+  local p123 =      p12 * invt +     p23 * t
+  local p0123 =    p012 * invt +    p123 * t
   return BezierCurve(self.p0, p01, p012, p0123),
          BezierCurve(p0123, p123, p23, self.p3)
 end
 
-local Vector = require 'Vector'
-local b = BezierCurve(Vector(0,0),Vector(0,1), Vector(1,2), Vector(2,2))
-print(b)
-print(b:subdivide(0.5))
+function BezierCurve:adaptive_subdivision(max_error, output)
+  max_error = max_error or 0.1
+  output = output or {}
+
+  local line = self.p3 - self.p0
+  local ctl1 = self.p1 - self.p0
+  local ctl2 = self.p2 - self.p3
+  if (ctl1 - ctl1:project(line)):square_magnitude() <= max_error*max_error and
+     (ctl2 - ctl2:project(line)):square_magnitude() <= max_error*max_error then
+    output[#output+1] = self
+  else
+    local b1, b2 = self:subdivide()
+    b1:adaptive_subdivision(max_error, output)
+    b2:adaptive_subdivision(max_error, output)
+  end
+
+  return output
+end
+
 return BezierCurve
