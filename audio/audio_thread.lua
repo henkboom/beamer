@@ -158,14 +158,17 @@ ffi.metatype('synth_s', {
 ---- message queue
 
 local message_types = {
+  -- in input stream only: stop the audio thread
+  stop = 0,
   -- in input stream only: add all preceding messages to the queue now
-  flush = 0,
+  flush = 1,
+
   -- set the frequency line of an operator (op_index, line_a, line_b)
-  operator_frequency = 1,
+  operator_frequency = 2,
   -- set the phase of an operator (op_index, phase)
-  operator_phase = 2,
+  operator_phase = 3,
   -- set a modulation (op1_index, op2_index, line_a, line_b)
-  modulation = 3,
+  modulation = 4,
 }
 
 ffi.cdef [[
@@ -262,20 +265,24 @@ message_queue_s = ffi.metatype('message_queue_s', {
 local portaudio = require 'portaudio'
 
 return function (linda)
-  print('audio thread')
+  print('audio thread started')
   local c = synth()
   local inbox = {}
   local messages = message_queue()
 
   portaudio.init()
 
+  local playing = true
+
   local sample_time = 0
-  while true do
+  while playing do
     -- get incoming messages and queue them up
     local message = linda:receive(0, 'audio_thread')
     while message do
       message = message_s(unpack(message))
-      if message.type == message_types.flush then
+      if message.type == message_types.stop then
+        playing = false
+      elseif message.type == message_types.flush then
         for i = 1, #inbox do
           messages:add(inbox[i])
           inbox[i] = nil
@@ -332,5 +339,7 @@ return function (linda)
   end
 
   portaudio.uninit()
+
+  print('audio thread stopped')
 end
 
