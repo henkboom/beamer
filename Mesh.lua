@@ -11,8 +11,8 @@ local Mesh = class('Mesh')
 --- ### `Mesh([data])`
 --- Creates a new mesh object. If `data` is given, it should be a table with
 --- string keys. The text key 'elements', if present, has its value passed to
---- `mesh:set_elements()`, and for other keys the key-value pair is passed to
---- `mesh:set_attribute()`.
+--- `mesh:set_elements_from_data()`, and for other keys the key-value pair is
+--- passed to `mesh:set_attribute_from_data()`.
 function Mesh:_init(data)
   self.elements = false
   self.element_count = 0
@@ -20,19 +20,19 @@ function Mesh:_init(data)
   if data ~= nil then
     for k,v in pairs(data) do
       if k == 'elements' then
-        self:set_elements(v)
+        self:set_elements_from_data(v)
       else
-        self:set_attribute(k, v)
+        self:set_attribute_from_data(k, v)
       end
     end
   end
 end
 
---- ### `mesh:set_elements(data)`
+--- ### `mesh:set_elements_from_data(data)`
 --- Sets the element data for this mesh. This should be an array of vertex
 --- indices, each triple representing a triangle. `data` is a table or a cdata
 --- containing a native array of GLushort elements.
-function Mesh:set_elements(data)
+function Mesh:set_elements_from_data(data)
   assert(type(data) == 'table' or type(data) == 'cdata')
 
   if type(data) == 'table' then
@@ -47,11 +47,11 @@ function Mesh:set_elements(data)
   self.elements = BufferObject(gl.GL_ELEMENT_ARRAY_BUFFER, data)
 end
 
---- ### `mesh:set_attribute(name, data)`
+--- ### `mesh:set_attribute_from_data(name, data)`
 --- Sets the attribute named by `name`. `data` is either a table or a cdata
 --- containing a native array of GLfloat elements. Either way, `data` is
 --- interpreted as a tighly packed 3-array of vectors.
-function Mesh:set_attribute(name, data)
+function Mesh:set_attribute_from_data(name, data)
   assert(type(data) == 'table' or type(data) == 'cdata')
 
   if type(data) == 'table' then

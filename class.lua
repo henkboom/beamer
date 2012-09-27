@@ -1,18 +1,18 @@
-local catch_undefined_access = true
-
 local function class(name, base)
   assert(base == nil or type(base) == 'table', 'invalid base class')
 
   local c = {}
 
-  if base ~= nil then
+  local real_ctor
+
+  if base then
     for k,v in pairs(base) do
       c[k] = v
     end
 
     c._init = nil
     c._base = base
-    c._ctor = function (obj, ...)
+    real_ctor = function (obj, ...)
       if c._init then
         obj.super = base._ctor
         c._init(obj, ...)
@@ -22,23 +22,53 @@ local function class(name, base)
       end
     end
   else
-    c._ctor = function (obj, ...)
+    real_ctor = function (obj, ...)
       if c._init then
         c._init(obj, ...)
       end
     end
   end
 
-  c.__index = c
-  if catch_undefined_access then
-    c.__index = function (obj, k)
+  local getters = {}
+  local setters = {}
+
+  c._ctor = function (...)
+    for k,v in pairs(c) do
+      local name = string.match(k, '^get_(.*)$')
+      if name then getters[name] = v end
+      local name = string.match(k, '^set_(.*)$')
+      if name then setters[name] = v end
+    end
+
+    c._ctor = real_ctor
+    real_ctor(...)
+  end
+
+  c.__index = function (self, k)
+    local getter = getters[k]
+
+    if getter == nil then
       local val = c[k]
       if val == nil then
-        error('field ' .. tostring(k) .. ' is not declared on ' .. tostring(obj), 2)
+        error('field ' .. tostring(k) .. ' is not declared on ' ..
+              tostring(self), 2)
       end
       return val
     end
+
+    return getter(self)
   end
+
+  c.__newindex = function (self, k, v)
+    local setter = setters[k]
+
+    if setter == nil then
+      rawset(self, k, v)
+    else
+      setter(self, v)
+    end
+  end
+
   c._name = name
   c.__tostring = function (obj)
     setmetatable(obj, nil)
@@ -54,7 +84,7 @@ local function class(name, base)
   setmetatable(c, {
     __call = function (_, ...)
       local obj = setmetatable({}, c)
-      obj:_ctor(...)
+      c._ctor(obj,...)
       return obj
     end,
     __tostring = function ()
