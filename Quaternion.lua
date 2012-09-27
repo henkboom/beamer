@@ -68,7 +68,7 @@ function Quaternion.nlerp(a, b, t)
 end
 
 function Quaternion.rotate_vector(q, v)
-  local result = q * quaternion_type(0, v.x, v.y, v.z) * conjugate(q)
+  local result = q * quaternion_type(0, v.x, v.y, v.z) * Quaternion.conjugate(q)
   return Vector(result.x, result.y, result.z)
 end
 
