@@ -6,7 +6,7 @@ local reload = require 'reload'
 while restarting do
   restarting = false
 
-  local glfw = require 'glfw'
+  local glfw = require 'bindings.glfw'
   local game = require('Root')()
 
   local released = false

@@ -23,6 +23,8 @@ function Game:_init(update_events, draw_events)
   -- by name
   self.events = {}
 
+  self.events.handle_event = Event()
+
   -- fill them in
   for i = 1, #update_events do
     local e = Event()
@@ -49,6 +51,7 @@ function Game:start_game_loop()
   self._game_loop = GameLoop()
   self._game_loop.update:add_handler(function () self:_update() end)
   self._game_loop.draw:add_handler(function () self:_draw() end)
+  self._game_loop.handle_event:add_handler(self.events.handle_event)
   self._game_loop:enter_loop()
 end
 

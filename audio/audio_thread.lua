@@ -262,7 +262,7 @@ message_queue_s = ffi.metatype('message_queue_s', {
   }
 })
 
-local portaudio = require 'portaudio'
+local audio = require 'system.audio'
 
 return function (linda)
   print('audio thread started')
@@ -270,7 +270,7 @@ return function (linda)
   local inbox = {}
   local messages = message_queue()
 
-  portaudio.init()
+  audio.init()
 
   local playing = true
 
@@ -333,12 +333,12 @@ return function (linda)
 
     for i = 1, samples_until_next_message do
       local sample = c:process_sample(sample_time * inv_sample_rate)
-      portaudio.put_sample(sample)
+      audio.put_sample(sample)
       sample_time = sample_time + 1
     end
   end
 
-  portaudio.uninit()
+  audio.uninit()
 
   print('audio thread stopped')
 end

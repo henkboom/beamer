@@ -5,7 +5,7 @@ local gl = require 'gl'
 return function ()
   local vertex = Shader(gl.GL_VERTEX_SHADER)
   assert(vertex:load_from_string([=[
-  #version 120
+  #version 100
    
   uniform mat4 projection;
   uniform mat4 modelview;
@@ -23,7 +23,8 @@ return function ()
   
   local fragment = Shader(gl.GL_FRAGMENT_SHADER)
   assert(fragment:load_from_string([=[
-  #version 120
+  #version 100
+  precision lowp float;
 
   uniform sampler2D tex;
 

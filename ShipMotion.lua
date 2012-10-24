@@ -43,7 +43,9 @@ function ShipMotion:update()
   self._velocity = self._velocity + forwards * ACCELERATION * self.acceleration
 
   -- damping
-  local straightness = Vector.dot(self._velocity, forwards)
+  local straightness = math.min(1,
+    self._velocity == Vector.zero and 0 or
+      Vector.dot(self._velocity:normalized(), forwards))
   local damping
   if straightness <= 0 then
     damping = self._velocity * BRAKE_DAMPING
@@ -51,8 +53,12 @@ function ShipMotion:update()
     damping = Vector.project(self._velocity, right) * BRAKE_DAMPING
   end
 
-  self._velocity = self._velocity - damping +
-    damping:magnitude() * forwards * straightness
+  local boost = Vector.zero
+  if damping ~= Vector.zero then
+    boost = damping:project(self._velocity):magnitude() * forwards
+      * straightness * straightness
+  end
+  self._velocity = self._velocity - damping + boost
 
   -- movement
   t.position = t.position + self._velocity
