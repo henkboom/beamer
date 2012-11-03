@@ -14,6 +14,7 @@ function RelativeTransform:_init(parent_transform, local_transform)
   self.changed = Event()
 
   -- making this method a closure lets us use it as an event handler
+  -- TODO: this should unsubscribe from parents
   function self._invalidate()
     self._position = false
     self._orientation = false
