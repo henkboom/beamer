@@ -3,8 +3,11 @@
 
 local class = require 'class'
 local Component = require 'Component'
+local Collider = require 'Collider'
 local Material = require 'Material'
 local Mesh = require 'Mesh'
+local MeshCollisionShape = require 'MeshCollisionShape'
+local Transform = require 'Transform'
 local Vector = require 'Vector'
 
 local TrackWall = class('TrackWall', Component)
@@ -33,7 +36,7 @@ function TrackWall:_start(parent)
   local elements = {}
   local position = {}
 
-  local segments = self.curve:adaptive_subdivision(0.01)
+  local segments = self.curve:adaptive_subdivision(0.1)
   for i = 1, #segments do
     local s = segments[i]
     elements[(i-1)*6+1] = (i-1)*4+0
@@ -43,12 +46,28 @@ function TrackWall:_start(parent)
     elements[(i-1)*6+5] = (i-1)*4+3
     elements[(i-1)*6+6] = (i-1)*4+0
 
-    local normal1 = Vector.cross(s.p1-s.p0, Vector.k):normalized() * 0.1
-    local normal2 = Vector.cross(s.p1-s.p0, Vector.k):normalized() * 0.1
-    put_vector(position, s.p0 + normal1)
-    put_vector(position, s.p0 - normal1)
-    put_vector(position, s.p3 - normal2)
-    put_vector(position, s.p3 + normal2)
+    local normal = Vector.cross(s.p3-s.p0, Vector.k):normalized()
+    -- real line
+    put_vector(position, s.p0 + normal*0.1)
+    put_vector(position, s.p0 - normal*0.1)
+    put_vector(position, s.p3 - normal*0.1)
+    put_vector(position, s.p3 + normal*0.1)
+    -- collider line
+    --put_vector(position, s.p0)
+    --put_vector(position, s.p3)
+    --put_vector(position, (s.p0+s.p3)*0.5 + normal_right)
+    table.insert(self.game.track_colliders, Collider(
+      Transform(),
+      MeshCollisionShape({
+        s.p0, s.p3
+        --s.p0 + normal*0.1,
+        --s.p0 - normal*0.1,
+        --s.p3 - normal*0.1,
+        --s.p3 + normal*0.1
+      }, {
+        normal,
+        -normal
+      })))
   end
 
   self._renderer.mesh = Mesh({

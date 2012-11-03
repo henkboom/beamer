@@ -5,6 +5,8 @@ local class = require 'class'
 local Component = require 'Component'
 local Quaternion = require 'Quaternion'
 local Vector = require 'Vector'
+local Collider = require 'Collider'
+local MeshCollisionShape = require 'MeshCollisionShape'
 
 local ShipMotion = class('ShipMotion', Component)
 
@@ -16,6 +18,8 @@ function ShipMotion:_init(parent)
   self:super(parent)
 
   self.transform = false
+  self.collider = false
+  self.sweep_collider = false
 
   -- inputs
   self.acceleration = 0
@@ -28,6 +32,18 @@ end
 
 function ShipMotion:_start()
   self.transform = assert(self.transform or self.parent.transform)
+  self.collider = Collider(self.transform, MeshCollisionShape({
+    Vector(-0.3, -0.5),
+    Vector( 0.3, -0.5),
+    Vector( 0.3,  0.5),
+    Vector(-0.3,  0.5)
+  }))
+  self.sweep_collider = Collider(self.transform, MeshCollisionShape({
+    Vector(-0.2, -0.4),
+    Vector( 0.2, -0.4),
+    Vector( 0.2,  0.4),
+    Vector(-0.2,  0.4)
+  }))
 end
 
 function ShipMotion:update()
@@ -61,7 +77,28 @@ function ShipMotion:update()
   self._velocity = self._velocity - damping + boost
 
   -- movement
-  t.position = t.position + self._velocity
+  local movement_time = 1
+  for i = 1, #self.game.track_colliders do
+    local collision = self.sweep_collider:sweep(
+      self._velocity, self.game.track_colliders[i])
+    if collision and collision.time < movement_time then
+      movement_time = collision.time
+    end
+  end
+  t.position = t.position + movement_time * self._velocity
+
+  -- collision (this could be improved, strictly ordered and such)
+  for i = 1, #self.game.track_colliders do
+    local collision = self.collider:check_collision_with(self.game.track_colliders[i])
+    if collision then
+      --print('collision', collision.penetration)
+      self.transform.position = self.transform.position +
+        collision.normal * collision.penetration
+      if Vector.dot(self._velocity, collision.normal) < 0 then
+        self._velocity = self._velocity - Vector.project(self._velocity, collision.normal)*1.2
+      end
+    end
+  end
 end
 
 return ShipMotion
