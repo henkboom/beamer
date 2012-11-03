@@ -38,4 +38,20 @@ function Transform:set_orientation(orientation)
   end
 end
 
+function Transform:transform_point(point)
+  return self.orientation:rotate_vector(point) + self.position
+end
+
+function Transform:inverse_transform_point(point)
+  return self.orientation:conjugate():rotate_vector(point - self.position)
+end
+
+function Transform:transform_direction(direction)
+  return self.orientation:rotate_vector(direction)
+end
+
+function Transform:inverse_transform_direction(direction)
+  return self.orientation:conjugate():rotate_vector(direction)
+end
+
 return Transform
