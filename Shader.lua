@@ -4,6 +4,7 @@
 local class = require 'class'
 local ffi = require 'ffi'
 local gl = require 'gl'
+local system = require 'system'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
@@ -46,17 +47,20 @@ function Shader:get_name()
   return self._shader and self._shader.name
 end
 
---- ### `shader:load_from_string(str)`
+--- ### `shader:load_from_string(...)`
 --- Loads and compiles the shader from source code contained in the given
---- string, returning `success, messages`. `success` is `true` if compilation
---- succeeded, `false` otherwise. `messages` is either nil or a string with
---- compiler warnings and/or errors.
-function Shader:load_from_string(str)
+--- string(s), returning `success, messages`. `success` is `true` if
+--- compilation succeeded, `false` otherwise. `messages` is either nil or a
+--- string with compiler warnings and/or errors.
+function Shader:load_from_string(...)
   local shader_name = self:get_name()
+  local len = select('#', ...)
 
-  local source = ffi.new('const GLchar*[1]')
-  source[0] = str
-  gl.glShaderSource(shader_name, 1, source, nil)
+  local source = ffi.new('const GLchar*[?]', len)
+  for i = 1, len do
+    source[i-1] = select(i, ...)
+  end
+  gl.glShaderSource(shader_name, len, source, nil)
   gl.glCompileShader(shader_name)
 
   -- get messages
@@ -115,6 +119,22 @@ function Shader:load_from_file(filename)
   local data = assert(file:read('*a'))
   file:close()
   return self:load_from_string(data)
+end
+
+function Shader:get_prelude()
+  local version = ffi.string(gl.glGetString(gl.GL_VERSION))
+  if version:match('OpenGL ES') then
+    Shader.prelude = [=[
+      #version 100
+      precision lowp float;
+    ]=]
+  else
+    Shader.prelude = [=[
+      #version 120
+    ]=]
+  end
+
+  return Shader.prelude
 end
 
 return Shader
