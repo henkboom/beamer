@@ -32,12 +32,6 @@ function Camera:_init(parent)
   self.perspective_fov_y = math.pi/2
 
   self:add_handler_for('draw')
-  self:add_handler_for('update', function ()
-    -- TODO move this
-    self.transform.position =
-      self.transform.position * 0.9 +
-      self.game.player_ship.transform.position * 0.1
-  end)
 end
 
 function Camera:_start()

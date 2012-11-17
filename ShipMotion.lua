@@ -99,6 +99,11 @@ function ShipMotion:update()
       end
     end
   end
+
+  -- TODO move this
+  self.game.camera.transform.position =
+    self.game.camera.transform.position * 0.9 +
+    (self.transform.position + self._velocity*15) * 0.1
 end
 
 return ShipMotion
