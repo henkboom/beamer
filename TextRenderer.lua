@@ -106,4 +106,12 @@ function TextRenderer:_start()
   self._renderer.transform = self.transform
 end
 
+function TextRenderer:get_render_lists()
+  return self._renderer.render_lists
+end
+
+function TextRenderer:set_render_lists(render_lists)
+  self._renderer.render_lists = render_lists
+end
+
 return TextRenderer

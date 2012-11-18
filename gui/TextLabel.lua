@@ -14,8 +14,7 @@ function TextLabel:_init(parent)
 
   self._text_renderer = TextRenderer(self)
   self._text_renderer.transform = self.transform
-  -- TODO this is ugly
-  self._text_renderer._renderer.render_lists = {self.game.gui_render_list}
+  self._text_renderer.render_lists = {self.game.gui_render_list}
   self.size = Vector(1, 1)
 
 end
