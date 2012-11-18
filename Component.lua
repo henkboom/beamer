@@ -7,6 +7,7 @@ local Event = require 'Event'
 local Component = class('Component')
 
 function Component:_init(parent)
+  assert(parent, 'invalid parent passed to Component constructor')
   self.game = parent.game
   self.parent = parent
   self.removed = Event()
