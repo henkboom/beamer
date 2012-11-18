@@ -16,6 +16,8 @@ function MeshRenderer:_init(parent)
   self.transform = false
   self.mesh = false
   self.material = false
+
+  self.render_lists = {self.game.render_list}
 end
 
 function MeshRenderer:_start()
@@ -26,10 +28,13 @@ function MeshRenderer:_start()
 
   -- add job to render list
   local job = RenderJob(function (camera) self:_render(camera) end)
-  self.game.render_list:add_job(job)
-  self.removed:add_handler(function ()
-    self.game.render_list:remove_job(job)
-  end)
+
+  for _, render_list in ipairs(self.render_lists) do
+    render_list:add_job(job)
+    self.removed:add_handler(function ()
+      render_list:remove_job(job)
+    end)
+  end
 end
 
 function MeshRenderer:_render(camera)
