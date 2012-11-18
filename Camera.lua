@@ -35,7 +35,7 @@ function Camera:_init(parent)
 end
 
 function Camera:_start()
-  self.tranform = assert(self.transform or self.parent.transform)
+  self.transform = assert(self.transform or self.parent.transform)
   self.render_lists = self.render_lists or {self.game.render_list}
 
   assert(self.projection_mode == 'orthographic' or
@@ -46,7 +46,8 @@ function Camera:draw()
   local ratio = self.game.video.width / self.game.video.height
   if self.projection_mode == 'perspective' then
     self.projection_matrix =
-      Matrix.perspective(math.pi/2, ratio, 0.1, 10000)
+      Matrix.perspective(math.pi/2, ratio,
+                         self.near_clipping_plane, self.far_clipping_plane)
   else
     self.projection_matrix = Matrix.orthographic(
       -self.orthographic_height*ratio/2, self.orthographic_height*ratio/2,
@@ -63,7 +64,7 @@ function Camera:draw()
   gl.glDepthMask(gl.GL_TRUE)
 
   if(self.clear_color) then
-    gl.glClearColor(0, 0, 0, 0)
+    gl.glClearColor(unpack(self.clear_color))
     gl.glClear(gl.GL_COLOR_BUFFER_BIT + gl.GL_DEPTH_BUFFER_BIT)
   else
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
