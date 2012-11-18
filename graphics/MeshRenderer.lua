@@ -1,12 +1,12 @@
---- MeshRenderer
---- ============
+--- graphics.MeshRenderer
+--- =====================
 
 local class = require 'class'
 local Component = require 'Component'
 local ffi = require 'ffi'
 local gl = require 'gl'
 local Matrix = require 'Matrix'
-local RenderJob = require 'RenderJob'
+local RenderJob = require 'graphics.RenderJob'
 
 MeshRenderer = class('MeshRenderer', Component)
 

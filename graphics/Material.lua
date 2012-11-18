@@ -1,10 +1,10 @@
---- Material
---- ========
+--- graphics.Material
+--- =================
 
 local class = require 'class'
 local gl = require 'gl'
 local Matrix = require 'Matrix'
-local Texture = require 'Texture'
+local Texture = require 'graphics.Texture'
 local Vector = require 'Vector'
 
 local Material = class('Material')

@@ -1,5 +1,5 @@
---- Program
---- =======
+--- graphics.Program
+--- ================
 
 local class = require 'class'
 local ffi = require 'ffi'

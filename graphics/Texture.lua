@@ -1,5 +1,5 @@
---- Texture
---- ============
+--- graphics.Texture
+--- ================
 
 local class = require 'class'
 local ffi = require 'ffi'

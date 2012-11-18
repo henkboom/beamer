@@ -3,7 +3,7 @@
 
 local class = require 'class'
 local Component = require 'Component'
-local TextRenderer = require 'TextRenderer'
+local TextRenderer = require 'graphics.TextRenderer'
 local Widget = require 'gui.Widget'
 local Vector = require 'Vector'
 

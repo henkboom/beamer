@@ -1,5 +1,5 @@
---- RenderList
---- ==========
+--- graphics.RenderList
+--- ===================
 
 local class = require 'class' 
 

@@ -1,5 +1,5 @@
-local Program = require 'Program'
-local Shader = require 'Shader'
+local Program = require 'graphics.Program'
+local Shader = require 'graphics.Shader'
 local gl = require 'gl'
 
 return function ()

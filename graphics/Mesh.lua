@@ -1,7 +1,7 @@
---- Mesh
---- ====
+--- graphics.Mesh
+--- =============
 
-local BufferObject = require 'BufferObject'
+local BufferObject = require 'graphics.BufferObject'
 local class = require 'class'
 local ffi = require 'ffi'
 local gl = require 'gl'

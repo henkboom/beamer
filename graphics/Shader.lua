@@ -1,5 +1,5 @@
---- Shader
---- ======
+--- graphics.Shader
+--- ===============
 
 local class = require 'class'
 local ffi = require 'ffi'

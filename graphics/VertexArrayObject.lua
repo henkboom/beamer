@@ -1,4 +1,4 @@
---- VertexArrayObject
+--- graphics.VertexArrayObject
 --- =================
 
 local class = require 'class'

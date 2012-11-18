@@ -1,5 +1,5 @@
---- Camera
---- ======
+--- graphics.Camera
+--- ===============
 
 local class = require 'class'
 local Component = require 'Component'

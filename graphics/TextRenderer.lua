@@ -1,16 +1,16 @@
---- TextRenderer
---- ============
+--- graphics.TextRenderer
+--- =====================
 
 local class = require 'class'
 local Component = require 'Component'
 local gl = require 'gl'
 local png = require 'png'
-local Material = require 'Material'
-local Mesh = require 'Mesh'
-local MeshRenderer = require 'MeshRenderer'
+local Material = require 'graphics.Material'
+local Mesh = require 'graphics.Mesh'
+local MeshRenderer = require 'graphics.MeshRenderer'
 local font = require 'font'
 local text_shader = require 'shaders.text'
-local Texture = require 'Texture'
+local Texture = require 'graphics.Texture'
 local Transform = require 'Transform'
 local Vector = require 'Vector'
 

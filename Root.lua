@@ -5,10 +5,10 @@ local Quaternion = require 'Quaternion'
 return blueprint('Root', 'Game', {
   {'self.video', {'Video', 'self'}},
 
-  {'self.render_list', {'RenderList'}},
-  {'self.gui_render_list', {'RenderList'}},
+  {'self.render_list', {'graphics.RenderList'}},
+  {'self.gui_render_list', {'graphics.RenderList'}},
 
-  {'self.camera', {'Camera', 'self'}},
+  {'self.camera', {'graphics.Camera', 'self'}},
   {'self.camera.transform', {'Transform',
     {'Vector', 0, 0, 0},
     {Quaternion.from_rotation(Vector.j, math.pi/4) *
@@ -20,7 +20,7 @@ return blueprint('Root', 'Game', {
   {'self.camera.orthographic_height', 30},
 
 
-  {'self.gui_camera', {'Camera', 'self'}},
+  {'self.gui_camera', {'graphics.Camera', 'self'}},
   {'self.gui_camera.transform', {'Transform', {'Vector', 0, 0, 0},
     {Quaternion.from_rotation(Vector.i, -math.pi/2)}}},
   {'self.gui_camera.near_clipping_plane', -100},

@@ -1,5 +1,5 @@
---- BufferObject
---- ============
+--- graphics.BufferObject
+--- =====================
 
 local class = require 'class'
 local ffi = require 'ffi'

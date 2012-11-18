@@ -1,5 +1,5 @@
---- RenderJob
---- =========
+--- graphics.RenderJob
+--- ==================
 
 local class = require 'class'
 
