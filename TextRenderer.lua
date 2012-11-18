@@ -24,7 +24,13 @@ local function put_vector(t, v)
   t[len+3] = v.z
 end
 
+function TextRenderer:get_text()
+  return self._text
+end
+
 function TextRenderer:set_text(str)
+  self._text = str
+
   local elements = {}
   local position = {}
   local tex_coord = {}
@@ -45,10 +51,10 @@ function TextRenderer:set_text(str)
       elements[#elements+1] = index
 
       local offset = Vector(glyph.offset[1], -glyph.offset[2])
-      put_vector(position, (pos + offset + Vector(            0,             0))/64/4)
-      put_vector(position, (pos + offset + Vector(glyph.rect[3],             0))/64/4)
-      put_vector(position, (pos + offset + Vector(glyph.rect[3], -glyph.rect[4]))/64/4)
-      put_vector(position, (pos + offset + Vector(            0, -glyph.rect[4]))/64/4)
+      put_vector(position, (pos + offset + Vector(            0,             0))/64)
+      put_vector(position, (pos + offset + Vector(glyph.rect[3],             0))/64)
+      put_vector(position, (pos + offset + Vector(glyph.rect[3], -glyph.rect[4]))/64)
+      put_vector(position, (pos + offset + Vector(            0, -glyph.rect[4]))/64)
 
       local rect = {
         glyph.rect[1] / font.width,
@@ -76,18 +82,14 @@ end
 function TextRenderer:_init(parent)
   self:super(parent)
 
+  self.transform = false
+
   self._renderer = MeshRenderer(self)
-  self._renderer.transform = Transform()
   self._renderer.material = Material()
   self._renderer.material.blend_src = 'src_alpha'
   self._renderer.material.blend_dst = 'one_minus_src_alpha'
   self._renderer.material.program = text_shader()
-  self._renderer.mesh = Mesh({
-    elements = {0,1,2, 2,3,0},
-    position = {0,0,0, 1,0,0, 1,1,0, 0,1,0},
-    tex_coord = {0,1,0, 1,1,0, 1,0,0, 0,0,0}
-  })
-  self:set_text("TextRenderer.")
+  self._renderer.mesh = Mesh()
 
   local tex = Texture(gl.GL_TEXTURE_2D)
   tex:set_data(assert(png.load('font.png')))
@@ -95,6 +97,13 @@ function TextRenderer:_init(parent)
   self._renderer.material.uniforms.color = {1, 1, 1, 1}
   self._renderer.material.uniforms.inner_threshold = 0.75
   self._renderer.material.uniforms.outer_threshold = 0.25
+
+  self.text = ''
+end
+
+function TextRenderer:_start()
+  self.transform = self.transform or Transform()
+  self._renderer.transform = self.transform
 end
 
 return TextRenderer
