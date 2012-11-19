@@ -45,7 +45,7 @@ function GameLoop:enter_loop()
     local event = input.get_event()
     while event do
       self.handle_event(event)
-      if event.type == 'kill' then
+      if event.type == 'kill' or event.type == 'quit' then
         self._running = false
       end
       event = input.get_event()
