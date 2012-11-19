@@ -4,7 +4,9 @@ local pinned = {}
 
 function reload.reload()
   for key in pairs(package.loaded) do
-    if not pinned[key] then
+    if not pinned[key] and
+       not key:match('system%..*') and
+       not key:match('bindings%..*') then
       package.loaded[key] = nil
     end
   end

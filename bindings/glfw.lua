@@ -1,7 +1,5 @@
 local ffi = require 'ffi'
 
-require('reload').pin(...)
-
 local glfw = ffi.load('glfw')
 
 ffi.cdef((string.gsub([[

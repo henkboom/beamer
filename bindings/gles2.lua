@@ -6,8 +6,6 @@
 
 local ffi = require 'ffi'
 
-require('reload').pin(...)
-
 local libgl = ffi.load('GLESv2')
 
 ffi.cdef [[
