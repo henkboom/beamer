@@ -84,15 +84,24 @@ else -- assume desktop otherwise
   local inited = false
 
   function video.init()
-    assert(glfw.glfwInit() == gl.GL_TRUE, 'glfwInit failed')
+    if not inited then
+      assert(glfw.glfwInit() == gl.GL_TRUE, 'glfwInit failed')
 
-    assert(
-      glfw.glfwOpenWindow(width, height, 8, 8, 8, 8, 24, 0, glfw.GLFW_WINDOW)
-        == gl.GL_TRUE, 'glfwOpenWindow failed')
+      assert(
+        glfw.glfwOpenWindow(width, height, 8, 8, 8, 8, 24, 0, glfw.GLFW_WINDOW)
+          == gl.GL_TRUE, 'glfwOpenWindow failed')
+
+      glfw.glfwSwapInterval(1)
+
+      inited = true
+    end
   end
 
   function video.uninit()
-    glfw.glfwCloseWindow()
+    if initted then
+      glfw.glfwCloseWindow()
+      inited = false
+    end
   end
 
   function video.swap_buffers()
