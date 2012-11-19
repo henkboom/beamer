@@ -43,7 +43,8 @@ local pointers_right = {}
 function PlayerInput:handle_event(event)
   if event.type == 'pointer_down' then
     local video = require 'system.video'
-    local zone = event.x < 400 and pointers_left or pointers_right
+    local zone = event.x < self.game.video.width/2 and
+                 pointers_left or pointers_right
     zone[event.id] = true
   elseif event.type == 'pointer_up' or
          event.type == 'pointer_cancel' then

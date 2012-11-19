@@ -43,6 +43,8 @@ function Camera:_start()
 end
 
 function Camera:draw()
+  gl.glViewport(0, 0, self.game.video.width, self.game.video.height)
+
   local ratio = self.game.video.width / self.game.video.height
   if self.projection_mode == 'perspective' then
     self.projection_matrix =

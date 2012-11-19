@@ -46,6 +46,10 @@ local function key_up(key)
   return {type = 'key_up', key = key}
 end
 
+local function resize(width, height)
+  return {type = 'resize', width = width, height = height}
+end
+
 local function quit()
   return {type = 'quit'}
 end
@@ -302,6 +306,15 @@ else -- assume desktop otherwise
           table.insert(events, pointer_up(0, position.x, position.y))
         end
       end
+    end))
+
+    glfw.glfwSetWindowSizeCallback(wrap_errors(function (width, height)
+      table.insert(events, resize(width, height))
+    end))
+
+    glfw.glfwSetWindowCloseCallback(wrap_errors(function ()
+      table.insert(events, quit())
+      return gl.GL_FALSE
     end))
 
     return events
