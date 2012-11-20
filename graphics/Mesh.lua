@@ -1,7 +1,7 @@
 --- graphics.Mesh
 --- =============
 
-local BufferObject = require 'graphics.BufferObject'
+local Buffer = require 'graphics.Buffer'
 local class = require 'class'
 local ffi = require 'ffi'
 local gl = require 'gl'
@@ -44,7 +44,7 @@ function Mesh:set_elements_from_data(data)
   end
 
   self.element_count = ffi.sizeof(data) / ffi.sizeof('GLushort');
-  self.elements = BufferObject(gl.GL_ELEMENT_ARRAY_BUFFER, data)
+  self.elements = Buffer(gl.GL_ELEMENT_ARRAY_BUFFER, data)
 end
 
 --- ### `mesh:set_attribute_from_data(name, data)`
@@ -62,7 +62,7 @@ function Mesh:set_attribute_from_data(name, data)
     end
   end
 
-  self.attributes[name] = BufferObject(gl.GL_ARRAY_BUFFER, data)
+  self.attributes[name] = Buffer(gl.GL_ARRAY_BUFFER, data)
 end
 
 return Mesh
