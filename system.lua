@@ -6,7 +6,7 @@
 local system_mt = {}
 local system = setmetatable({}, system_mt)
 
-function system_mt:index(k)
+function system_mt:__index(k)
   if k == 'platform' then
     system.init()
     return system[k]
