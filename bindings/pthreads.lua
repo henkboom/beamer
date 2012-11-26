@@ -91,9 +91,10 @@ elseif system.platform == 'linux' then
     typedef unsigned long int pthread_t;
   ]]
 
-end
-
 ---- common -------------------------------------------------------------------
+else
+  error('unsupported platform')
+end
 
 ffi.cdef [[
 static const int PTHREAD_INHERIT_SCHED = 0;
