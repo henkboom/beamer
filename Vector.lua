@@ -3,7 +3,7 @@
 
 local ffi = require 'ffi'
 
-local vector_type = ffi.typeof('struct {double x, y, z; }')
+local vector_type = ffi.typeof('struct { double x, y, z; }')
 local Vector = setmetatable({}, {
   __call = function (_, ...) return vector_type(...) end
 })

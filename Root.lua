@@ -5,15 +5,14 @@ local Quaternion = require 'Quaternion'
 return blueprint('Root', 'Game', {
   {'self.video', {'Video', 'self'}},
 
+  -- main rendering
   {'self.render_list', {'graphics.RenderList'}},
-  {'self.gui_render_list', {'graphics.RenderList'}},
-
   {'self.camera', {'graphics.Camera', 'self'}},
   {'self.camera.transform', {'Transform',
     {'Vector', 0, 0, 0},
     {Quaternion.from_rotation(Vector.j, math.pi/4) *
-     Quaternion.from_rotation(Vector.i, -math.pi/6)
-  }}},
+     Quaternion.from_rotation(Vector.i, -math.pi/6)}
+  }},
   {'self.camera.near_clipping_plane', -100},
   {'self.camera.far_clipping_plane', 100},
   {'self.camera.projection_mode', '"orthographic"'},
@@ -23,6 +22,8 @@ return blueprint('Root', 'Game', {
   {'self.postprocess.material', {'graphics.Material'}},
   {'self.postprocess.material.program', {'shaders.textured'}},
 
+  -- gui rendering
+  {'self.gui_render_list', {'graphics.RenderList'}},
   {'self.gui_camera', {'graphics.Camera', 'self'}},
   {'self.gui_camera.transform', {'Transform', {'Vector', 0, 0, 0},
     {Quaternion.from_rotation(Vector.i, -math.pi/2)}}},
@@ -35,12 +36,11 @@ return blueprint('Root', 'Game', {
 
   {'self.widget_manager', {'gui.WidgetManager', 'self'}},
 
-  {'self.track_colliders', '{}'},
-
+  -- player
   {'self.player_ship', {'PlayerShip', 'self'}},
 
-  --{'self.text', {'TextRenderer', 'self'}},
-  --{'self.text.text', '"TEST"'},
+  -- track
+  {'self.track_colliders', '{}'},
 
   {'self.wall1', {'TrackWall', 'self'}},
   {'self.wall1.transform', {'Transform'}},
