@@ -21,17 +21,18 @@ end
 --- ### `texture:set_data(data, width, height, channels)
 --- Sets the image data of the texture.
 ---
---- - `data` is `width*height*channels` bytes of image data to load.
+--- - `data` is `width*height*channels` bytes of image data to load, or `false`
+---   if this texture is going to be used as a render target.
 --- - `width` is the image width in pixels.
 --- - `height` is the image height in pixels.
---- - `channels` is the number of channels in the image data, and should be
----   either 3 or 4.
+--- - `channels` is the number of channels, which should be either 3 or 4.
 function Texture:set_data(image, width, height, channels)
   assert(self.name, 'texture:set_data() called on deleted texture')
-  assert(type(image) == 'cdata')
+  assert(image == false or type(image) == 'cdata')
   assert(type(width) == 'number' and width > 0)
   assert(type(height) == 'number' and height > 0)
-  assert(channels and (channels == 3 or channels == 4))
+  assert(channels and (channels == 3 or channels == 4),
+         'invalid number of channels, must be 3 or 4')
 
   local format = channels == 3 and gl.GL_RGB or gl.GL_RGBA
 
@@ -39,7 +40,7 @@ function Texture:set_data(image, width, height, channels)
   gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MIN_FILTER, gl.GL_LINEAR)
   gl.glTexParameterf(gl.GL_TEXTURE_2D, gl.GL_TEXTURE_MAG_FILTER, gl.GL_LINEAR)
   gl.glTexImage2D(
-    self.target, 0, format, width, height, 0, format, gl.GL_UNSIGNED_BYTE, image)
+    self.target, 0, format, width, height, 0, format, gl.GL_UNSIGNED_BYTE, image or nil)
   self:unbind()
 end
 

@@ -31,6 +31,8 @@ function Camera:_init(parent)
   self.orthographic_height = 2
   self.perspective_fov_y = math.pi/2
 
+  self.target_framebuffer = false
+
   self:add_handler_for('draw')
 end
 
@@ -43,6 +45,10 @@ function Camera:_start()
 end
 
 function Camera:draw()
+  if self.target_framebuffer then
+    self.target_framebuffer:bind()
+  end
+
   gl.glViewport(0, 0, self.game.video.width, self.game.video.height)
 
   local ratio = self.game.video.width / self.game.video.height
@@ -72,9 +78,6 @@ function Camera:draw()
     gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
   end
 
-  gl.glEnable(gl.GL_BLEND)
-  gl.glBlendFunc(gl.GL_SRC_ALPHA, gl.GL_ONE_MINUS_SRC_ALPHA)
-  gl.glDepthFunc(gl.GL_LESS)
   local jobs = {}
   for i = 1, #self.render_lists do
     for job in pairs(self.render_lists[i].jobs) do
@@ -100,6 +103,10 @@ function Camera:draw()
   for i = 0, max_texture_units - 1 do
     gl.glActiveTexture(gl.GL_TEXTURE0 + i)
     gl.glBindTexture(gl.GL_TEXTURE_2D, 0)
+  end
+
+  if self.target_framebuffer then
+    self.target_framebuffer:unbind()
   end
 end
 

@@ -19,6 +19,9 @@ return blueprint('Root', 'Game', {
   {'self.camera.projection_mode', '"orthographic"'},
   {'self.camera.orthographic_height', 30},
 
+  {'self.postprocess', {'graphics.PostProcess', 'self', 'self.camera'}},
+  {'self.postprocess.material', {'graphics.Material'}},
+  {'self.postprocess.material.program', {'shaders.textured'}},
 
   {'self.gui_camera', {'graphics.Camera', 'self'}},
   {'self.gui_camera.transform', {'Transform', {'Vector', 0, 0, 0},
