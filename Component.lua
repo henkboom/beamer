@@ -23,6 +23,7 @@ function Component:_init(parent)
     end
   end)
 
+  self:unseal()
   self.game:add_component(self)
 end
 

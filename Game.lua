@@ -77,6 +77,7 @@ function Game:_start_new_components()
       if not component.dead and component._start then
         component:_start()
       end
+      component:seal()
     end
   end
 end

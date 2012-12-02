@@ -1,3 +1,5 @@
+local _sealed = {'_sealed'}
+
 local function class(name, base)
   assert(base == nil or type(base) == 'table', 'invalid base class')
 
@@ -43,7 +45,7 @@ local function class(name, base)
       end
       -- if there isn't a getter then we've got an error
       if not getters[k] then
-        error('field ' .. tostring(k) .. ' is not declared on ' ..
+        error('field "' .. tostring(k) .. '" is not declared on ' ..
               tostring(self), 2)
       end
       -- invoke the getter
@@ -59,8 +61,11 @@ local function class(name, base)
 
     if setters[k] then
       setters[k](self, v)
-    else
+    elseif not self[_sealed] then
       rawset(self, k, v)
+    else
+      error('field "' .. tostring(k) .. '" is not declared in assignment ' ..
+            'to ' .. tostring(self) .. ' (a sealed object)', 2)
     end
   end
 
@@ -76,12 +81,23 @@ local function class(name, base)
     return getmetatable(value) == c
   end
 
+  c.seal = function(self)
+    self[_sealed] = true
+  end
+
+  c.unseal = function(self)
+    self[_sealed] = false
+  end
+
   c.class = c
 
   setmetatable(c, {
     __call = function (_, ...)
       local obj = setmetatable({}, c)
       c._ctor(obj,...)
+      if rawget(obj, _sealed) == nil then
+        obj[_sealed] = true
+      end
       return obj
     end,
     __tostring = function ()

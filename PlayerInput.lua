@@ -24,7 +24,8 @@ function PlayerInput:_init(parent)
   self.joystick_number = 0
 
   self.direction = Vector.zero
-  self.action = 0
+  self.a = false
+  self.b = false
   
   self.changed = Event()
 
