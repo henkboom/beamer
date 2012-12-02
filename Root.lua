@@ -26,11 +26,12 @@ return blueprint('Root', 'Game', {
   {'self.gui_render_list', {'graphics.RenderList'}},
   {'self.gui_camera', {'graphics.Camera', 'self'}},
   {'self.gui_camera.transform', {'Transform', {'Vector', 0, 0, 0},
-    {Quaternion.from_rotation(Vector.i, -math.pi/2)}}},
+    {Quaternion.from_rotation(Vector.i, math.pi/2)}}},
   {'self.gui_camera.near_clipping_plane', -100},
   {'self.gui_camera.far_clipping_plane', 100},
   {'self.gui_camera.projection_mode', '"orthographic"'},
   {'self.gui_camera.orthographic_height', 8},
+  {'self.gui_camera.orthographic_alignment', {'Vector', 1, 0}},
   {'self.gui_camera.render_lists', '{self.gui_render_list}'},
   {'self.gui_camera.clear_color', false},
 

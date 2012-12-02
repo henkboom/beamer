@@ -29,6 +29,7 @@ function Camera:_init(parent)
   self.projection_mode = 'orthographic'
 
   self.orthographic_height = 2
+  self.orthographic_alignment = Vector(0.5, 0.5)
   self.perspective_fov_y = math.pi/2
 
   self.target_framebuffer = false
@@ -57,10 +58,14 @@ function Camera:draw()
       Matrix.perspective(math.pi/2, ratio,
                          self.near_clipping_plane, self.far_clipping_plane)
   else
+    local align = self.orthographic_alignment
     self.projection_matrix = Matrix.orthographic(
-      -self.orthographic_height*ratio/2, self.orthographic_height*ratio/2,
-      -self.orthographic_height/2, self.orthographic_height/2,
-      self.near_clipping_plane, self.far_clipping_plane)
+      -self.orthographic_height*ratio/2 * align.x*2,
+      self.orthographic_height*ratio/2 * (1-align.x)*2,
+      -self.orthographic_height/2 * align.y*2,
+      self.orthographic_height/2 * (1-align.y)*2,
+      self.near_clipping_plane,
+      self.far_clipping_plane)
   end
 
   self.modelview_matrix = Matrix.inverse(Matrix.from_transform(
