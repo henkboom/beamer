@@ -77,6 +77,7 @@ function Camera:draw()
   gl.glDepthMask(gl.GL_TRUE)
 
   if(self.clear_color) then
+    gl.glColorMask(gl.GL_TRUE, gl.GL_TRUE, gl.GL_TRUE, gl.GL_TRUE)
     gl.glClearColor(unpack(self.clear_color))
     gl.glClear(gl.GL_COLOR_BUFFER_BIT + gl.GL_DEPTH_BUFFER_BIT)
   else
