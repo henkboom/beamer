@@ -19,15 +19,15 @@ local function wrap_errors(fn)
   end
 end
 
---- event types
+--- general
 --- ---------------------------------------------------------------------------
 
 local function pointer_down(id, x, y)
   return {type = 'pointer_down', id = id, x=x, y=y}
 end
 
-local function pointer_motion(id, x, y)
-  return {type = 'pointer_motion', id = id, x = x, y = y}
+local function pointer_motion(id, x, y, dx, dy)
+  return {type = 'pointer_motion', id = id, x = x, y = y, dx = dx, dy = dy}
 end
 
 local function pointer_up(id, x, y)
@@ -58,6 +58,12 @@ local function kill()
   return {type = 'kill'}
 end
 
+local events = {}
+
+function input.get_event()
+  return table.remove(events, 1)
+end
+
 --- android
 --- ---------------------------------------------------------------------------
 
@@ -68,7 +74,6 @@ if system.platform == 'android' then
   local glue = require 'bindings.android_native_app_glue'
 
   local android_app
-  local events = {}
 
   -- track current positions of pointers
   local pointer_states = {}
@@ -153,8 +158,10 @@ if system.platform == 'android' then
         local y = android.AMotionEvent_getY(event, i)
         if pointer_states[id] and
            (x ~= pointer_states[id].x or y ~= pointer_states[id].y) then
+          local dx = x - pointer_states[id].x
+          local dy = y - pointer_states[id].y
           pointer_states[id] = {x, y}
-          table.insert(events, pointer_motion(id, x, y))
+          table.insert(events, pointer_motion(id, x, y, dx, dy))
         end
       end
       return 1
@@ -180,10 +187,6 @@ if system.platform == 'android' then
       ret = android.ALooper_pollAll(
         0, nil, nil, ffi.cast('void**', poll_source))
     end
-  end
-
-  function input.get_event()
-    return table.remove(events, 1)
   end
 
 --- desktop
@@ -270,7 +273,6 @@ else -- assume desktop otherwise
 
 
   local position = {x = 0, y = 0}
-  local events = {}
 
   function input.init()
     assert(glfw.glfwInit() == gl.GL_TRUE, 'glfwInit failed')
@@ -293,9 +295,11 @@ else -- assume desktop otherwise
     end))
 
     glfw.glfwSetMousePosCallback(wrap_errors(function (x, y)
+      local dx = x - position.x
+      local dy = y - position.y
       position.x = x
       position.y = y
-      table.insert(events, pointer_motion(0, x, y))
+      table.insert(events, pointer_motion(0, x, y, dx, dy))
     end))
 
     glfw.glfwSetMouseButtonCallback(wrap_errors(function (button, action)
@@ -326,10 +330,6 @@ else -- assume desktop otherwise
 
   -- turn off jit compilation because glfwPollEvents can call back into lua
   jit.off(input.poll_events)
-
-  function input.get_event()
-    return table.remove(events, 1)
-  end
 
 end
 
