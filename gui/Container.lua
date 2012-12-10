@@ -30,6 +30,26 @@ function Container:_start()
   self:refresh()
 end
 
+function Container:handle_event(event)
+  if event.type == 'pointer_down' then
+    for _, child in ipairs(self.children) do
+      local pos = child.transform.position
+      local size = child.size
+
+      if pos.x <= event.x and event.x < pos.x + size.x and
+         pos.y <= event.y and event.y < pos.y + size.y then
+
+        local ret = child:handle_event(event)
+        if ret then
+          return ret
+        end
+
+      end
+    end
+    return false
+  end
+end
+
 function Container:refresh()
   local new_size = Vector(0, 0)
 
