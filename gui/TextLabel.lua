@@ -1,5 +1,5 @@
---- TextLabel
---- =========
+--- gui.TextLabel
+--- =============
 
 local class = require 'class'
 local Component = require 'Component'
@@ -19,8 +19,6 @@ function TextLabel:_init(parent)
   self._text_renderer.transform = RelativeTransform(self.transform,
     Transform(Vector.zero, Quaternion.from_rotation(Vector.i, math.pi)))
   self._text_renderer.render_lists = {self.game.gui_render_list}
-  self.size = Vector(1, 1)
-
 end
 
 function TextLabel:get_text()
@@ -29,6 +27,7 @@ end
 
 function TextLabel:set_text(str)
   self._text_renderer.text = str
+  self.size = self._text_renderer.size
 end
 
 return TextLabel

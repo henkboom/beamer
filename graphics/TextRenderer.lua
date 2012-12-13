@@ -31,6 +31,7 @@ end
 function TextRenderer:set_text(str)
   self._text = str
 
+  -- TODO calculate mesh lazily
   local elements = {}
   local position = {}
   local tex_coord = {}
@@ -70,6 +71,8 @@ function TextRenderer:set_text(str)
       index = index + 4
       pos = pos + Vector(glyph.advance, 0)
     end
+
+    self.size = Vector(pos.x/64, 1)
   end
 
   self._renderer.mesh = Mesh({
@@ -98,6 +101,7 @@ function TextRenderer:_init(parent)
   self._renderer.material.uniforms.inner_threshold = 0.75
   self._renderer.material.uniforms.outer_threshold = 0.25
 
+  self.size = Vector(0, 1)
   self.text = ''
 end
 
