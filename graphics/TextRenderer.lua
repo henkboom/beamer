@@ -98,8 +98,6 @@ function TextRenderer:_init(parent)
   tex:set_data(assert(png.load('font.png')))
   self._renderer.material.uniforms.tex = tex
   self._renderer.material.uniforms.color = {1, 1, 1, 1}
-  self._renderer.material.uniforms.inner_threshold = 0.75
-  self._renderer.material.uniforms.outer_threshold = 0.25
 
   self.size = Vector(0, 1)
   self.text = ''
