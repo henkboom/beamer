@@ -30,7 +30,7 @@ return blueprint('Root', 'Game', {
   {'self.gui_camera.near_clipping_plane', -100},
   {'self.gui_camera.far_clipping_plane', 100},
   {'self.gui_camera.projection_mode', '"orthographic"'},
-  {'self.gui_camera.orthographic_height', 8},
+  {'self.gui_camera.orthographic_height', 20},
   {'self.gui_camera.orthographic_alignment', {'Vector', 1, 0}},
   {'self.gui_camera.render_lists', '{self.gui_render_list}'},
   {'self.gui_camera.clear_color', false},

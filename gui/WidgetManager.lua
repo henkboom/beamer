@@ -3,9 +3,10 @@
 ---
 --- Manages dispatching of global events into the widget tree.
 
+local Button = require 'gui.Button'
 local class = require 'class'
 local Component = require 'Component'
-
+local Dragger = require 'gui.Dragger'
 local Vector = require 'Vector'
 local VerticalContainer = require 'gui.VerticalContainer'
 local TextLabel = require 'gui.TextLabel'
@@ -23,7 +24,10 @@ function WidgetManager:_init(parent)
   text1.text = 'first text label'
   local text2 = TextLabel(self)
   text2.text = 'second text label'
-  self.root.children = { text1, text2 }
+  local button = Button(self)
+  local dragger = Dragger(self)
+  self.root.children = { text1, text2, button, dragger }
+  button.pressed:add_handler(function () print('button pressed') end)
 
   self:add_handler_for('handle_event')
 end
@@ -39,13 +43,24 @@ function WidgetManager:handle_event(_e)
   if e.type == 'pointer_down' or
      e.type == 'pointer_up' or
      e.type == 'pointer_motion' then
+
+    local inverse_matrix = (self.game.gui_camera.projection_matrix *
+                            self.game.gui_camera.modelview_matrix):inverse()
     local pos = Vector(
       (e.x / self.game.video.width - 0.5) * 2,
       (e.y / self.game.video.height - 0.5) * -2)
-    pos = (self.game.gui_camera.projection_matrix *
-           self.game.gui_camera.modelview_matrix):inverse() * pos
+    pos = inverse_matrix * pos
     e.x = pos.x
     e.y = pos.y
+
+    if e.type == 'pointer_motion' then
+      local delta = Vector(
+        e.dx / self.game.video.width * 2 * inverse_matrix[0],
+        e.dy / self.game.video.height * -2 * inverse_matrix[5])
+
+      e.dx = delta.x
+      e.dy = delta.y
+    end
   end
 
   -- new pointer
