@@ -74,6 +74,10 @@ function RelativeTransform:get_position()
   return self._position
 end
 
+function RelativeTransform:set_position()
+  error('position is read-only on RelativeTransform')
+end
+
 -- relative_transform.orientation (read only, computed lazily)
 function RelativeTransform:get_orientation()
   if not self._orientation then
@@ -81,6 +85,10 @@ function RelativeTransform:get_orientation()
       self.parent_transform.orientation * self.local_transform.orientation
   end
   return self._orientation
+end
+
+function RelativeTransform:set_orientation()
+  error('orientation is read-only on RelativeTransform')
 end
 
 return RelativeTransform
