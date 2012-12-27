@@ -26,7 +26,7 @@ return function ()
 
     #ifdef GL_ES
       #ifdef GL_OES_standard_derivatives
-        #extension GL_OES_standard_derivatives enable
+        #extension GL_OES_standard_derivatives : enable
         #define USE_DERIVATIVE
       #endif
     #else
