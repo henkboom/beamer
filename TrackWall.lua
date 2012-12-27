@@ -36,7 +36,7 @@ function TrackWall:_start(parent)
   local elements = {}
   local position = {}
 
-  local segments = self.curve:adaptive_subdivision(0.1)
+  local segments = self.curve:adaptive_subdivision(0.2)
   for i = 1, #segments do
     local s = segments[i]
     elements[(i-1)*6+1] = (i-1)*4+0
