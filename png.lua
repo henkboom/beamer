@@ -1,8 +1,14 @@
 local ffi = require 'ffi'
+local system = require 'system'
 
 require('reload').pin(...)
 
-local libpng = ffi.load('png')
+local libpng
+if system.platform == 'android' then
+  libpng = ffi.C
+else
+  libpng = ffi.load('png')
+end
 
 local PNG_LIBPNG_VER_STRING = '1.2.46'
 
@@ -784,6 +790,8 @@ extern void png_save_uint_16
 ]]
 
 local png = {}
+local logging = require 'system.logging'
+local resources = require 'system.resources'
 
 local function error_fn(png_ptr, message)
   error('fatal error loading png: ' .. ffi.string(message))
@@ -793,8 +801,22 @@ local function warning_fn(png_ptr, message)
   io.stderr:write(ffi.string(message) .. '\n')
 end
 
+local current_data
+local current_index
+local function read_fn(png_ptr, dst, count)
+  assert(#current_data >= current_index + count, 'premature end of png file')
+  local substring = current_data:sub(
+    current_index+1, current_index+tonumber(count))
+  current_index = current_index + tonumber(count)
+  ffi.copy(dst, substring, tonumber(count))
+end
+
 -- returns image, width, height, channels | nil, error_message
 function png.load(filename)
+  -- callbacks in here, make sure to disable jit
+  jit.off(true, true)
+
+  logging.log('loading png ' .. filename)
   local file
   local png_ptr
   local info_ptr
@@ -806,7 +828,8 @@ function png.load(filename)
   local image
 
   local success, msg = pcall(function ()
-    file = io.open(filename, 'rb')
+    current_data = resources.load(filename)
+    current_index = 0
 
     png_ptr = libpng.png_create_read_struct(
       PNG_LIBPNG_VER_STRING, nil, error_fn, warning_fn)
@@ -815,7 +838,8 @@ function png.load(filename)
     info_ptr = libpng.png_create_info_struct(png_ptr)
     assert(info_ptr ~= nil, 'png_create_info_struct failed')
 
-    libpng.png_init_io(png_ptr, file)
+    --libpng.png_init_io(png_ptr, current_file)
+    libpng.png_set_read_fn(png_ptr, nil, read_fn)
 
     libpng.png_read_info(png_ptr, info_ptr)
     libpng.png_set_expand(png_ptr)
@@ -837,8 +861,8 @@ function png.load(filename)
     libpng.png_read_image(png_ptr, row_pointers)
   end)
 
-  if file then
-    file:close()
+  if current_data then
+    current_data = nil
   end
   if png_ptr ~= nil then
     libpng.png_destroy_read_struct(
