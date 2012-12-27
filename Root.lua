@@ -16,7 +16,7 @@ return blueprint('Root', 'Game', {
   {'self.camera.near_clipping_plane', -100},
   {'self.camera.far_clipping_plane', 100},
   {'self.camera.projection_mode', '"orthographic"'},
-  {'self.camera.orthographic_height', 30},
+  {'self.camera.orthographic_height', 25},
 
   {'self.postprocess', {'graphics.PostProcess', 'self', 'self.camera'}},
   {'self.postprocess.material', {'graphics.Material'}},
@@ -39,6 +39,7 @@ return blueprint('Root', 'Game', {
 
   -- player
   {'self.player_ship', {'PlayerShip', 'self'}},
+  {'self.player_ship.transform.position', {'Vector', 48, 0, 0}},
 
   -- track
   {'self.track_colliders', '{}'},
@@ -77,5 +78,42 @@ return blueprint('Root', 'Game', {
     {'Vector', -32,  64, 0},
     {'Vector', -64,  32, 0},
     {'Vector', -64,   0, 0},
+  }},
+
+
+  {'self.wall5', {'TrackWall', 'self'}},
+  {'self.wall5.transform', {'Transform'}},
+  {'self.wall5.curve', {'BezierCurve',
+    {'Vector',   0, -32, 0},
+    {'Vector',  32, -32, 0},
+    {'Vector',  32, -32, 0},
+    {'Vector',  32,   0, 0},
+  }},
+
+  {'self.wall6', {'TrackWall', 'self'}},
+  {'self.wall6.transform', {'Transform'}},
+  {'self.wall6.curve', {'BezierCurve',
+    {'Vector',   0,  32, 0},
+    {'Vector',  32,  32, 0},
+    {'Vector',  32,  32, 0},
+    {'Vector',  32,   0, 0},
+  }},
+
+  {'self.wall7', {'TrackWall', 'self'}},
+  {'self.wall7.transform', {'Transform'}},
+  {'self.wall7.curve', {'BezierCurve',
+    {'Vector',   0, -32, 0},
+    {'Vector', -32, -32, 0},
+    {'Vector', -32, -32, 0},
+    {'Vector', -32,   0, 0},
+  }},
+
+  {'self.wall8', {'TrackWall', 'self'}},
+  {'self.wall8.transform', {'Transform'}},
+  {'self.wall8.curve', {'BezierCurve',
+    {'Vector',   0,  32, 0},
+    {'Vector', -32,  32, 0},
+    {'Vector', -32,  32, 0},
+    {'Vector', -32,   0, 0},
   }},
 })
