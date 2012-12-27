@@ -46,13 +46,16 @@ function Camera:_start()
 end
 
 function Camera:draw()
+  local viewport = self.game.video.viewport
   if self.target_framebuffer then
     self.target_framebuffer:bind()
+    gl.glViewport(0, 0, viewport.w, viewport.h)
+  else
+    gl.glViewport(viewport.x, self.game.video.size.y - viewport.y - viewport.h,
+                  viewport.w, viewport.h)
   end
 
-  gl.glViewport(0, 0, self.game.video.width, self.game.video.height)
-
-  local ratio = self.game.video.width / self.game.video.height
+  local ratio = viewport.w / viewport.h
   if self.projection_mode == 'perspective' then
     self.projection_matrix =
       Matrix.perspective(math.pi/2, ratio,

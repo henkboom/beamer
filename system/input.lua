@@ -46,8 +46,8 @@ local function key_up(key)
   return {type = 'key_up', key = key}
 end
 
-local function resize(width, height)
-  return {type = 'resize', width = width, height = height}
+local function resize(x, y, w, h)
+  return {type = 'resize', x = x, y = y, w = w, h = h}
 end
 
 local function quit()
@@ -73,13 +73,13 @@ if system.platform == 'android' then
   local android = require 'bindings.android'
   local glue = require 'bindings.android_native_app_glue'
 
-  local android_app
-
   -- track current positions of pointers
   local pointer_states = {}
 
+  -- TODO this should probably be refactored since its needed from
+  -- system/resources
   function input.android_set_android_app(new_android_app)
-    android_app = new_android_app
+    input.android_app = new_android_app
   end
 
   local function handle_command (_, cmd)
@@ -92,7 +92,14 @@ if system.platform == 'android' then
     if cmd == glue.APP_CMD_TERM_WINDOW or
        cmd == glue.APP_CMD_DESTROY then
       logging.log("KILL")
+      -- TODO clean this up a bit
+      require('system.video').uninit()
       table.insert(events, kill())
+    elseif cmd == glue.APP_CMD_CONTENT_RECT_CHANGED then
+      local rect = input.android_app.contentRect
+      local w, h = rect.right-rect.left, rect.bottom-rect.top
+      logging.log('resize', rect.left, rect.top, w, h)
+      table.insert(events, resize(rect.left, rect.top, w, h))
     end
   end
 
@@ -158,8 +165,8 @@ if system.platform == 'android' then
         local y = android.AMotionEvent_getY(event, i)
         if pointer_states[id] and
            (x ~= pointer_states[id].x or y ~= pointer_states[id].y) then
-          local dx = x - pointer_states[id].x
-          local dy = y - pointer_states[id].y
+          local dx = x - pointer_states[id][1]
+          local dy = y - pointer_states[id][2]
           pointer_states[id] = {x, y}
           table.insert(events, pointer_motion(id, x, y, dx, dy))
         end
@@ -170,24 +177,39 @@ if system.platform == 'android' then
   end
 
   function input.init()
-    assert(android_app, 'android system.input not initialized with android_app')
-    android_app.onAppCmd = handle_command
-    android_app.onInputEvent = handle_input
+    assert(input.android_app,
+      'android system.input not initialized with android_app')
+    input.android_app.onAppCmd = handle_command
+    input.android_app.onInputEvent = handle_input
+
+    -- if the width and height are nonzero we're using a preexisting window and
+    -- won't get a proper resize event, so synthesize one
+    local rect = input.android_app.contentRect
+    local w, h = rect.right-rect.left, rect.bottom-rect.top
+    if w ~= 0 and h ~= 0 then
+      logging.log('init resize', rect.left, rect.top, w, h)
+      table.insert(events, resize(rect.left, rect.top, w, h))
+    end
   end
 
   function input.poll_events()
+    -- TODO why doesn't the jit.off(input.poll_events) work well enough?
+    jit.off()
     local poll_source = ffi.new('struct android_poll_source*[1]')
     local ret = android.ALooper_pollAll(
       0, nil, nil, ffi.cast('void**', poll_source))
     while ret >= 0 do
       if poll_source[0] ~= nil then
-        poll_source[0].process(android_app, poll_source[0])
+        poll_source[0].process(input.android_app, poll_source[0])
       end
 
       ret = android.ALooper_pollAll(
         0, nil, nil, ffi.cast('void**', poll_source))
     end
+    jit.on()
   end
+  -- turn off jit compilation because ALooper_poll* can call back into lua
+  --jit.off(input.poll_events)
 
 --- desktop
 --- ---------------------------------------------------------------------------
@@ -313,7 +335,7 @@ else -- assume desktop otherwise
     end))
 
     glfw.glfwSetWindowSizeCallback(wrap_errors(function (width, height)
-      table.insert(events, resize(width, height))
+      table.insert(events, resize(0, 0, width, height))
     end))
 
     glfw.glfwSetWindowCloseCallback(wrap_errors(function ()

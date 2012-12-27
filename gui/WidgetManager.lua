@@ -44,19 +44,20 @@ function WidgetManager:handle_event(_e)
      e.type == 'pointer_up' or
      e.type == 'pointer_motion' then
 
+    local viewport = self.game.video.viewport
     local inverse_matrix = (self.game.gui_camera.projection_matrix *
                             self.game.gui_camera.modelview_matrix):inverse()
     local pos = Vector(
-      (e.x / self.game.video.width - 0.5) * 2,
-      (e.y / self.game.video.height - 0.5) * -2)
+      (e.x / viewport.w - 0.5) * 2,
+      (e.y / viewport.h - 0.5) * -2)
     pos = inverse_matrix * pos
     e.x = pos.x
     e.y = pos.y
 
     if e.type == 'pointer_motion' then
       local delta = Vector(
-        e.dx / self.game.video.width * 2 * inverse_matrix[0],
-        e.dy / self.game.video.height * -2 * inverse_matrix[5])
+        e.dx / viewport.w * 2 * inverse_matrix[0],
+        e.dy / viewport.h * -2 * inverse_matrix[5])
 
       e.dx = delta.x
       e.dy = delta.y

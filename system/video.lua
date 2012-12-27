@@ -18,9 +18,11 @@ if system.platform == 'android' then
   local egl = require 'bindings.egl'
   local ffi = require 'ffi'
 
+  local initted = false
   local window
   local display
   local surface
+  local context
 
   function video.android_set_window(w)
     window = w
@@ -50,7 +52,7 @@ if system.platform == 'android' then
     local ctx_attribs = ffi.new('EGLint[3]',
       egl.EGL_CONTEXT_CLIENT_VERSION, 2,
       egl.EGL_NONE)
-    local context = egl.eglCreateContext(display, ptr_config[0], nil, ctx_attribs);
+    context = egl.eglCreateContext(display, ptr_config[0], nil, ctx_attribs);
 
     assert(egl.eglMakeCurrent(display, surface, surface, context) == egl.EGL_TRUE,
       'unable to eglMakeCurrent');
@@ -65,7 +67,33 @@ if system.platform == 'android' then
   end
 
   function video.uninit()
-    -- TODO
+    if display ~= nil then
+      logging.log(1)
+      egl.eglMakeCurrent(display, nil, nil, nil)
+      if context ~= nil then
+        logging.log(2)
+        egl.eglDestroyContext(display, context)
+        context = nil
+      end
+      if surface ~= nil then
+        logging.log(3)
+        egl.eglDestroySurface(display, surface)
+        surface = nil
+      end
+      logging.log(4)
+      egl.eglTerminate(display);
+      display = nil
+    end
+    logging.log('video terminated')
+  end
+
+  function video.get_size()
+    local ptr_width = ffi.new('EGLint[1]')
+    local ptr_height = ffi.new('EGLint[1]')
+
+    egl.eglQuerySurface(display, surface, egl.EGL_WIDTH, ptr_width);
+    egl.eglQuerySurface(display, surface, egl.EGL_HEIGHT, ptr_height);
+    return {tonumber(ptr_width[0]), tonumber(ptr_height[0])}
   end
 
   function video.swap_buffers()
@@ -107,7 +135,6 @@ else -- assume desktop otherwise
   function video.swap_buffers()
     glfw.glfwSwapBuffers()
   end
-
 end
 
 return video

@@ -21,6 +21,8 @@ while restarting do
   end)
 
   game:start_game_loop()
+  game = nil
+  collectgarbage()
 
   if restarting then
     local reload = require 'reload'

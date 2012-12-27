@@ -43,7 +43,8 @@ function PostProcess:_init(parent, camera)
   -- register on camera
   camera.target_framebuffer = self.framebuffer
 
-  self:add_handler_for(self.game.video.size_changed, '_refresh_resolution')
+  self:add_handler_for(
+    self.game.video.viewport_changed, '_refresh_resolution')
   self:add_handler_for('draw')
 end
 
@@ -57,16 +58,17 @@ function PostProcess:_start()
 end
 
 function PostProcess:_refresh_resolution()
-  local w = self.game.video.width
-  local h = self.game.video.height
+  local viewport = self.game.video.viewport
 
-  self.colorbuffer:set_data(false, w, h, 4)
-  self.depthbuffer:create_storage(gl.GL_DEPTH_COMPONENT16, w, h)
+  self.colorbuffer:set_data(false, viewport.w, viewport.h, 4)
+  self.depthbuffer:create_storage(gl.GL_DEPTH_COMPONENT16,
+    viewport.w, viewport.h)
 end
 
 function PostProcess:draw()
-  gl.glViewport(0, 0, self.game.video.width, self.game.video.height)
-  gl.glClearColor(0, 0, 0, 0)
+  local viewport = self.game.video.viewport
+  gl.glViewport(viewport.x, self.game.video.size.y - viewport.y - viewport.h,
+                viewport.w, viewport.h)
   gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
   self.material:render(self.mesh)
 end
