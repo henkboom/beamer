@@ -69,9 +69,12 @@ function Shader:load_from_string(...)
   gl.glGetShaderiv(shader_name, gl.GL_INFO_LOG_LENGTH, length);
 
   -- if there was an error message then return it
-  if length[0] > 1 then
-    local log = ffi.new('GLchar[' .. length[0] .. ']')
-    gl.glGetShaderInfoLog(shader_name, length[0], nil, log)
+  -- do this even if the reported length was zero because android always
+  -- reports a length of zero >_<
+  length[0] = math.max(1024, length[0])
+  local log = ffi.new('GLchar[?]', length[0])
+  gl.glGetShaderInfoLog(shader_name, length[0], length, log)
+  if(length[0] > 0) then
     msg = ffi.string(log)
   end
 
@@ -82,7 +85,7 @@ function Shader:load_from_string(...)
     if msg then
       return nil, 'shader compilation error: \n' .. msg
     else
-      return nil, 'shader compilation error'
+      return nil, 'shader compilation error: unknown'
     end
   else
     if msg then
