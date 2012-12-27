@@ -29,8 +29,8 @@ end
 function Texture:set_data(image, width, height, channels)
   assert(self.name, 'texture:set_data() called on deleted texture')
   assert(image == false or type(image) == 'cdata')
-  assert(type(width) == 'number' and width > 0)
-  assert(type(height) == 'number' and height > 0)
+  assert(type(width) == 'number' and width > 0, 'invalid width')
+  assert(type(height) == 'number' and height > 0, 'invalid height')
   assert(channels and (channels == 3 or channels == 4),
          'invalid number of channels, must be 3 or 4')
 
