@@ -7,6 +7,7 @@ local ffi = require 'ffi'
 local gl = require 'gl'
 local Matrix = require 'Matrix'
 local RenderJob = require 'graphics.RenderJob'
+local Vector = require 'Vector'
 
 MeshRenderer = class('MeshRenderer', Component)
 
@@ -39,6 +40,8 @@ end
 
 function MeshRenderer:_render(camera)
   -- update the camera/transform uniforms
+  local viewport = self.game.video.viewport
+  self.material.uniforms.screen_size = Vector(viewport.w, viewport.h)
   self.material.uniforms.projection = camera.projection_matrix
   self.material.uniforms.modelview = camera.modelview_matrix *
     Matrix.from_transform(self.transform.position, self.transform.orientation)
