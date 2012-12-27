@@ -5,16 +5,20 @@
 
 local class = require 'class'
 local ffi = require 'ffi'
-local gl = require 'gl'
+local logging = require 'system.logging'
 
 local gl_name = ffi.typeof('struct { GLuint name; }')
 
 local GlObject = class('GlObject')
 
-local _object = {'object'}
-local _delete = {'delete'}
-local _bind = {'bind'}
-local _target = {'target'}
+local function private_var(name)
+  name = 'private<' .. name .. '>'
+  return setmetatable({}, {tostring=function() return name end})
+end
+local _object = private_var 'object'
+local _delete = private_var 'delete'
+local _bind = private_var 'bind'
+local _target = private_var 'target'
 
 --- ### `GlObject(gen, delete, bind, target)`
 --- Creates a new GlObject object with its own OpenGL handle, using the given
@@ -40,7 +44,15 @@ function GlObject:_init(gen, delete, bind, target)
   local name = ffi.new('GLuint[1]')
   gen(1, name)
   self[_object].name = name[0]
-  ffi.gc(self[_object], function () self:delete() end)
+
+  ffi.gc(self[_object], function (_object)
+    if _object.name ~= 0 then
+      logging.log('warning: cleaning up leftover GlObject ' .. _object.name)
+      local name = ffi.new('GLuint[1]')
+      name[0] = _object.name
+      delete(1, name)
+    end
+  end)
 end
 
 --- ### `GlObject:delete()`
@@ -54,6 +66,7 @@ function GlObject:delete()
     local name = ffi.new('GLuint[1]')
     name[0] = self[_object].name
     self[_delete](1, name)
+    self[_object].name = 0
     self[_object] = false
   end
 end
