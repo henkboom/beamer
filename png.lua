@@ -793,13 +793,13 @@ local png = {}
 local logging = require 'system.logging'
 local resources = require 'system.resources'
 
-local function error_fn(png_ptr, message)
+local error_fn = ffi.cast('png_error_ptr', function (png_ptr, message)
   error('fatal error loading png: ' .. ffi.string(message))
-end
+end)
 
-local function warning_fn(png_ptr, message)
+local warning_fn = ffi.cast('png_error_ptr', function (png_ptr, message)
   io.stderr:write(ffi.string(message) .. '\n')
-end
+end)
 
 local current_data
 local current_index
