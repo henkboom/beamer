@@ -15,7 +15,6 @@ local TrackWall = class('TrackWall', Component)
 function TrackWall:_init(parent)
   self:super(parent)
   self.curve = false
-  self.transform = false
 
   self._renderer = MeshRenderer(self)
   self._renderer.material = Material()
@@ -30,7 +29,6 @@ local function put_vector(t, v)
 end
 
 function TrackWall:_start(parent)
-  assert(self.transform, 'missing  transform')
   assert(self.curve, 'missing curve')
   
   local elements = {}
