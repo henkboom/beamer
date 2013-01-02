@@ -41,25 +41,29 @@ local function eval(context, value)
 end
 
 local function assign(context, address_elements, value)
-  local obj = context
+  local obj = context.self
   for i = 1, #address_elements-1 do
     obj = obj[address_elements[i]]
   end
   obj[address_elements[#address_elements]] = value
 end
 
-local function blueprint(name, base, instructions)
+local function blueprint(name, base, modifications)
   local blueprint_class = class(name, require(base))
+  blueprint_class.name = name
+  blueprint_class.base = base
+  blueprint_class.modifications = modifications
+
   function blueprint_class:_init(...)
     self:super(...)
     local context = setmetatable({self = self}, {__index = _G})
-    for i = 1, #instructions do
-      local instruction = instructions[i]
-      if #instruction ~= 2 then
-        error('wrong number of elements in instruction '
+    for i = 1, #modifications do
+      local modification = modifications[i]
+      if #modification ~= 2 then
+        error('wrong number of elements in modification '
               .. i .. ' of "' .. name .. '"')
       end
-      assign(context, parse_address(instruction[1]), eval(context, instruction[2]))
+      assign(context, parse_address(modification[1]), eval(context, modification[2]))
     end
   end
   return blueprint_class
