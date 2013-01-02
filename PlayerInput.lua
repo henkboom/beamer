@@ -6,6 +6,7 @@ local Component = require 'Component'
 local Event = require 'Event'
 local Vector = require 'Vector'
 local logging = require 'system.logging'
+local system = require 'system'
 
 local PlayerInput = class('PlayerInput', Component)
 
@@ -44,7 +45,7 @@ local pointers_left = {}
 local pointers_right = {}
 
 function PlayerInput:handle_event(event)
-  if event.type == 'pointer_motion' then
+  if event.type == 'pointer_motion' and system.platform == 'android' then
     local rect = self.game.video.viewport
     local origin = Vector(rect.x + rect.w/2, rect.y + rect.h/2)
     local old_pos = Vector(event.x-event.dx, event.y-event.dy) - origin
