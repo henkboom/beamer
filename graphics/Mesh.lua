@@ -28,6 +28,20 @@ function Mesh:_init(data)
   end
 end
 
+--- ### `mesh:delete()`
+--- Releases storage created for this Mesh
+function Mesh:delete()
+  if self.elements then
+    self.elements:delete()
+    self.elements = false
+  end
+
+  for key, attribute in pairs(self.attributes) do
+    attribute:delete()
+    self.attributes[key] = nil
+  end
+end
+
 --- ### `mesh:set_elements_from_data(data)`
 --- Sets the element data for this mesh. This should be an array of vertex
 --- indices, each triple representing a triangle. `data` is a table or a cdata

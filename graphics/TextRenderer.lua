@@ -75,6 +75,10 @@ function TextRenderer:set_text(str)
     self.size = Vector(pos.x/64, 1)
   end
 
+  if self._renderer.mesh then
+    self._renderer.mesh:delete()
+    self._renderer.mesh = false
+  end
   self._renderer.mesh = Mesh({
     elements = elements,
     position = position,
@@ -94,8 +98,19 @@ function TextRenderer:_init(parent)
   self._renderer.material.program = text_shader()
   self._renderer.mesh = Mesh()
 
-  local tex = Texture(gl.GL_TEXTURE_2D)
-  tex:set_data(assert(png.load('font.png')))
+  self.removed:add_handler(function ()
+    if self._renderer.mesh then
+      self.mesh:delete()
+    end
+  end)
+
+  if not self.game.resources.font_texture then
+    local tex = Texture(gl.GL_TEXTURE_2D)
+    tex:set_data(png.load('font.png'))
+    self.game.resources.font_texture = tex
+  end
+
+  local tex = self.game.resources.font_texture
   self._renderer.material.uniforms.tex = tex
   self._renderer.material.uniforms.color = {1, 1, 1, 1}
 

@@ -7,6 +7,7 @@ local ffi = require 'ffi'
 local gl = require 'gl'
 local Matrix = require 'Matrix'
 local RenderJob = require 'graphics.RenderJob'
+local Transform = require 'Transform'
 local Vector = require 'Vector'
 
 MeshRenderer = class('MeshRenderer', Component)
@@ -22,8 +23,7 @@ function MeshRenderer:_init(parent)
 end
 
 function MeshRenderer:_start()
-  self.transform = assert(self.transform or self.parent.transform,
-    'missing transform')
+  self.transform = self.transform or Transform()
   assert(self.mesh, 'missing mesh')
   assert(self.material, 'missing material')
 

@@ -26,6 +26,11 @@ function BoxRenderer:_init(parent)
   self._needs_update = true
 
   self:add_handler_for('predraw')
+  self.removed:add_handler(function ()
+    if self._renderer.mesh then
+      self.mesh:delete()
+    end
+  end)
 end
 
 function BoxRenderer:get_thickness()
@@ -68,6 +73,10 @@ function BoxRenderer:_update_mesh()
     3,0,4, 4,7,3,
   }
 
+  if self._renderer.mesh then
+    self._renderer.mesh:delete()
+    self._renderer.mesh = false
+  end
   self._renderer.mesh = Mesh({
     elements = elements,
     position = position
