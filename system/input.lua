@@ -46,6 +46,14 @@ local function key_up(key)
   return {type = 'key_up', key = key}
 end
 
+local function character_down(character)
+  return {type = 'character_down', character = character}
+end
+
+local function character_up(key)
+  return {type = 'character_up', character = character}
+end
+
 local function resize(x, y, w, h)
   return {type = 'resize', x = x, y = y, w = w, h = h}
 end
@@ -312,6 +320,16 @@ else -- assume desktop otherwise
           table.insert(events, key_down(mapped_key))
         else
           table.insert(events, key_up(mapped_key))
+        end
+      end
+    end))
+
+    glfw.glfwSetCharCallback(wrap_errors(function (char, action)
+      if char < 256 then
+        if(action == glfw.GLFW_PRESS) then
+          table.insert(events, character_down(string.char(char)))
+        else
+          table.insert(events, character_up(string.char(char)))
         end
       end
     end))
