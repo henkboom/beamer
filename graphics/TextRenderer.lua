@@ -86,6 +86,7 @@ function TextRenderer:set_text(str)
   })
 end
 
+local shader_cache
 function TextRenderer:_init(parent)
   self:super(parent)
 
@@ -95,7 +96,10 @@ function TextRenderer:_init(parent)
   self._renderer.material = Material()
   self._renderer.material.blend_src = 'src_alpha'
   self._renderer.material.blend_dst = 'one_minus_src_alpha'
-  self._renderer.material.program = text_shader()
+  if not shader_cache then
+    shader_cache = text_shader()
+  end
+  self._renderer.material.program = shader_cache
   self._renderer.mesh = Mesh()
 
   self.removed:add_handler(function ()
