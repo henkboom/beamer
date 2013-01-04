@@ -4,11 +4,12 @@
 --- Manages dispatching of global events into the widget tree.
 
 local Button = require 'gui.Button'
+local BlueprintView = require 'gui.BlueprintView'
 local class = require 'class'
 local Component = require 'Component'
 local Dragger = require 'gui.Dragger'
 local Vector = require 'Vector'
-local VerticalContainer = require 'gui.VerticalContainer'
+local LinearContainer = require 'gui.LinearContainer'
 local TextLabel = require 'gui.TextLabel'
 
 local WidgetManager = class('WidgetManager', Component)
@@ -16,20 +17,26 @@ local WidgetManager = class('WidgetManager', Component)
 function WidgetManager:_init(parent)
   self:super(parent)
 
-  self.pointer_handlers = {}
+  self._pointer_handlers = {}
+  self._text_input_handler = false
 
   -- for testing
-  self.root = VerticalContainer(self)
-  local text1 = TextLabel(self)
-  text1.text = 'first text label'
-  local text2 = TextLabel(self)
-  text2.text = 'second text label'
-  local button = Button(self)
-  local dragger = Dragger(self)
-  self.root.children = { text1, text2, button, dragger }
-  button.pressed:add_handler(function () print('button pressed') end)
+  self.root = LinearContainer(self)
+  table.insert(self.root.children, BlueprintView(self, require 'Track'))
 
   self:add_handler_for('handle_event')
+end
+
+function WidgetManager:begin_text_entry(fn)
+  self:end_text_entry()
+  self._text_input_handler = fn
+end
+
+function WidgetManager:end_text_entry()
+  if self._text_input_handler then
+    self._text_input_handler({type = 'focus_lost'})
+    self._text_input_handler = false
+  end
 end
 
 function WidgetManager:handle_event(_e)
@@ -38,6 +45,17 @@ function WidgetManager:handle_event(_e)
   for k,v in pairs(_e) do
     e[k] = v
   end
+
+  ---- key input --------------------------------------------------------------
+
+  if e.type == 'key_down' or e.type == 'key_up' or
+     e.type == 'character_down' or e.type == 'character_up' then
+    if self._text_input_handler then
+      self._text_input_handler(e)
+    end
+  end
+
+  ---- pointer ----------------------------------------------------------------
 
   -- transform pointer event positions
   if e.type == 'pointer_down' or
@@ -66,24 +84,24 @@ function WidgetManager:handle_event(_e)
 
   -- new pointer
   if e.type == 'pointer_down' then
-    self.pointer_handlers[e.id] = self.root:handle_event(e) or false
-    if self.pointer_handlers[e.id] then
-      assert(type(self.pointer_handlers[e.id] == 'table') or
-             type(self.pointer_handlers[e.id] == 'function'),
+    self._pointer_handlers[e.id] = self.root:handle_event(e) or false
+    if self._pointer_handlers[e.id] then
+      assert(type(self._pointer_handlers[e.id] == 'table') or
+             type(self._pointer_handlers[e.id] == 'function'),
              'pointer_handler must be callable')
-      self.pointer_handlers[e.id](e)
+      self._pointer_handlers[e.id](e)
     end
   end
 
   -- only handle pointer motion/up/cancel events when the pointer was claimed
-  if e.type == 'pointer_motion' and self.pointer_handlers[e.id] then
-    self.pointer_handlers[e.id](e)
+  if e.type == 'pointer_motion' and self._pointer_handlers[e.id] then
+    self._pointer_handlers[e.id](e)
   end
 
   if (e.type == 'pointer_up' or e.type == 'pointer_cancel') and
-     self.pointer_handlers[e.id] then
-    self.pointer_handlers[e.id](e)
-    self.pointer_handlers[e.id] = false
+     self._pointer_handlers[e.id] then
+    self._pointer_handlers[e.id](e)
+    self._pointer_handlers[e.id] = false
   end
 end
 
