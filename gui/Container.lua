@@ -55,8 +55,8 @@ function Container:refresh()
 
   for _, child in ipairs(self.children) do
     new_size = Vector(
-      math.max(new_size.x, child.transform.position.x + child.size.x),
-      math.max(new_size.y, child.transform.position.y + child.size.y))
+      math.max(new_size.x, child.transform.local_transform.position.x + child.size.x),
+      math.max(new_size.y, child.transform.local_transform.position.y + child.size.y))
   end
 
   self.size = new_size
