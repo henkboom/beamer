@@ -104,7 +104,7 @@ function TextRenderer:_init(parent)
 
   self.removed:add_handler(function ()
     if self._renderer.mesh then
-      self.mesh:delete()
+      self._renderer.mesh:delete()
     end
   end)
 
