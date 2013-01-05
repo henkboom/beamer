@@ -26,6 +26,11 @@ function BoxRenderer:_init(parent)
   self._needs_update = true
 
   self:add_handler_for('predraw')
+  self.started:add_handler(function ()
+    self.transform = self.transform or Transform()
+    self._renderer.transform = self.transform
+  end)
+
   self.removed:add_handler(function ()
     if self._renderer.mesh then
       self.mesh:delete()
@@ -88,11 +93,6 @@ function BoxRenderer:predraw()
     self._needs_update = false
     self:_update_mesh()
   end
-end
-
-function BoxRenderer:_start()
-  self.transform = self.transform or Transform()
-  self._renderer.transform = self.transform
 end
 
 function BoxRenderer:get_render_lists()

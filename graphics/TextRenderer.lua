@@ -120,11 +120,11 @@ function TextRenderer:_init(parent)
 
   self.size = Vector(0, 1)
   self.text = ''
-end
 
-function TextRenderer:_start()
-  self.transform = self.transform or Transform()
-  self._renderer.transform = self.transform
+  self.started:add_handler(function ()
+    self.transform = self.transform or Transform()
+    self._renderer.transform = self.transform
+  end)
 end
 
 function TextRenderer:get_render_lists()

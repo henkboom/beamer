@@ -10,6 +10,7 @@ function Component:_init(parent)
   assert(parent, 'invalid parent passed to Component constructor')
   self.game = parent.game
   self.parent = parent
+  self.started = Event()
   self.removed = Event()
   self.dead = false
   -- private
@@ -26,9 +27,6 @@ function Component:_init(parent)
   self:unseal()
   self.game:add_component(self)
 end
-
--- optional method for subclasses
-Component._start = false
 
 function Component:remove()
   self.game:remove_component(self)

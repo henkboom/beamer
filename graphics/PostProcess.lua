@@ -46,15 +46,15 @@ function PostProcess:_init(parent, camera)
   self:add_handler_for(
     self.game.video.viewport_changed, '_refresh_resolution')
   self:add_handler_for('draw')
-end
 
-function PostProcess:_start()
-  assert(self.material, 'missing material on PostProcess')
-  self.material.depth_write = false
-  self.material.depth_func = 'always'
-  self.material.uniforms.tex = self.colorbuffer
-  self.material.uniforms.projection = Matrix.identity;
-  self.material.uniforms.modelview = Matrix.identity;
+  self.started:add_handler(function ()
+    assert(self.material, 'missing material on PostProcess')
+    self.material.depth_write = false
+    self.material.depth_func = 'always'
+    self.material.uniforms.tex = self.colorbuffer
+    self.material.uniforms.projection = Matrix.identity;
+    self.material.uniforms.modelview = Matrix.identity;
+  end)
 end
 
 function PostProcess:_refresh_resolution()

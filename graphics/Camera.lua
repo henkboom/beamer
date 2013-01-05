@@ -35,14 +35,14 @@ function Camera:_init(parent)
   self.target_framebuffer = false
 
   self:add_handler_for('draw')
-end
 
-function Camera:_start()
-  self.transform = assert(self.transform or self.parent.transform)
-  self.render_lists = self.render_lists or {self.game.render_list}
+  self.started:add_handler(function ()
+    self.transform = assert(self.transform or self.parent.transform)
+    self.render_lists = self.render_lists or {self.game.render_list}
 
-  assert(self.projection_mode == 'orthographic' or
-         self.projection_mode == 'perspective')
+    assert(self.projection_mode == 'orthographic' or
+           self.projection_mode == 'perspective')
+  end)
 end
 
 function Camera:draw()

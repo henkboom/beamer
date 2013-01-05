@@ -39,9 +39,9 @@ function TextField:handle_event(e)
 
     self.game.widget_manager:begin_text_entry(function (event)
       if event.type == 'focus_lost' then
-        self._label.text = self._value
+        self._label.text = self.value
       elseif event.type == 'key_down' and event.key == 'enter' then
-        self._value = self._label.text
+        self.value = self._label.text
         self.game.widget_manager:end_text_entry()
       elseif event.type == 'key_down' and event.key == 'backspace' then
         if #self._label.text > 0 then

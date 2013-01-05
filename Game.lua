@@ -74,8 +74,8 @@ function Game:_start_new_components()
 
     for i = 1, #components_to_start do
       local component = components_to_start[i]
-      if not component.dead and component._start then
-        component:_start()
+      if not component.dead then
+        component.started()
       end
       component:seal()
     end

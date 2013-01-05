@@ -28,22 +28,22 @@ function ShipMotion:_init(parent)
   self._velocity = Vector.zero;
 
   self:add_handler_for('update')
-end
 
-function ShipMotion:_start()
-  self.transform = assert(self.transform or self.parent.transform)
-  self.collider = Collider(self.transform, MeshCollisionShape({
-    Vector(-0.3, -0.5),
-    Vector( 0.3, -0.5),
-    Vector( 0.3,  0.5),
-    Vector(-0.3,  0.5)
-  }))
-  self.sweep_collider = Collider(self.transform, MeshCollisionShape({
-    Vector(-0.2, -0.4),
-    Vector( 0.2, -0.4),
-    Vector( 0.2,  0.4),
-    Vector(-0.2,  0.4)
-  }))
+  self.started:add_handler(function ()
+    self.transform = assert(self.transform or self.parent.transform)
+    self.collider = Collider(self.transform, MeshCollisionShape({
+      Vector(-0.3, -0.5),
+      Vector( 0.3, -0.5),
+      Vector( 0.3,  0.5),
+      Vector(-0.3,  0.5)
+    }))
+    self.sweep_collider = Collider(self.transform, MeshCollisionShape({
+      Vector(-0.2, -0.4),
+      Vector( 0.2, -0.4),
+      Vector( 0.2,  0.4),
+      Vector(-0.2,  0.4)
+    }))
+  end)
 end
 
 function ShipMotion:update()

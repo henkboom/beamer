@@ -16,18 +16,18 @@ local Container = class('Container', Widget)
 function Container:_init(parent)
   self:super(parent)
   self.children = {}
-end
 
-function Container:_start()
-  local refresh = function () self:refresh() end
+  self.started:add_handler(function ()
+    local refresh = function () self:refresh() end
 
-  for _, child in ipairs(self.children) do
-    child.transform.parent_transform = self.transform
-    child.transform.changed:add_handler(refresh)
-    child.size_changed:add_handler(refresh)
-  end
+    for _, child in ipairs(self.children) do
+      child.transform.parent_transform = self.transform
+      child.transform.changed:add_handler(refresh)
+      child.size_changed:add_handler(refresh)
+    end
 
-  self:refresh()
+    self:refresh()
+  end)
 end
 
 function Container:handle_event(event)
