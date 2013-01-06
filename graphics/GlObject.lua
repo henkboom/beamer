@@ -47,7 +47,7 @@ function GlObject:_init(gen, delete, bind, target)
 
   ffi.gc(self[_object], function (_object)
     if _object.name ~= 0 then
-      logging.log('warning: cleaning up leftover GlObject ' .. _object.name)
+      --logging.log('warning: cleaning up leftover GlObject ' .. _object.name)
       local name = ffi.new('GLuint[1]')
       name[0] = _object.name
       delete(1, name)
