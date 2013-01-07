@@ -3,10 +3,10 @@
 
 local class = require 'class'
 local Component = require 'Component'
-local Container = require 'gui.Container'
 local Vector = require 'Vector'
+local Widget = require 'gui.Widget'
 
-local LinearContainer = class('LinearContainer', Container)
+local LinearContainer = class('LinearContainer', Widget)
 
 local _orientation = {'orientation'}
 local _refreshing = {'refreshing'}
