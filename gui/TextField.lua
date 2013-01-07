@@ -16,8 +16,6 @@ function TextField:_init(parent, value)
 
   self.value_changed = Event()
   self:set_value(value or '')
-
-  table.insert(self.children, self._label)
 end
 
 function TextField:get_value(value)

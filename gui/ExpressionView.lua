@@ -13,11 +13,11 @@ function ExpressionView:_init(parent, expression)
 
   self.orientation = 'horizontal'
 
-  table.insert(self.children, TextLabel(self, '{'))
+  TextLabel(self, '{')
 
   for i, subexpr in ipairs(expression) do
     if i ~= 1 then
-      table.insert(self.children, TextLabel(self, ', '))
+      TextLabel(self, ', ')
     end
 
     if type(subexpr) == 'string' or type(subexpr) == 'number' then
@@ -35,15 +35,14 @@ function ExpressionView:_init(parent, expression)
         expression[i] = value
       end)
       -- TODO need to update in the other direction as well
-      table.insert(self.children, field)
     elseif type(subexpr) == 'table' then
-      table.insert(self.children, ExpressionView(self, subexpr))
+      ExpressionView(self, subexpr)
     else
-      table.insert(self.children, TextLabel(self, '<?>'))
+      TextLabel(self, '<?>')
     end
   end
 
-  table.insert(self.children, TextLabel(self, '}'))
+  TextLabel(self, '}')
 
 end
 

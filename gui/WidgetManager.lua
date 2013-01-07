@@ -9,7 +9,7 @@ local class = require 'class'
 local Component = require 'Component'
 local Dragger = require 'gui.Dragger'
 local Vector = require 'Vector'
-local LinearContainer = require 'gui.LinearContainer'
+local Widget = require 'gui.Widget'
 local TextLabel = require 'gui.TextLabel'
 
 local WidgetManager = class('WidgetManager', Component)
@@ -21,8 +21,8 @@ function WidgetManager:_init(parent)
   self._text_input_handler = false
 
   -- for testing
-  self.root = LinearContainer(self)
-  table.insert(self.root.children, BlueprintView(self, require 'Track'))
+  self.root = Widget(self)
+  BlueprintView(self.root, require 'Track')
 
   self:add_handler_for('handle_event')
 end

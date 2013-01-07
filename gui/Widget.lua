@@ -3,9 +3,8 @@
 ---
 --- Widgets how do they work?
 ---
---- Widgets have
---- - size, used by parents for layout purposes
---- - handle_event method
+--- Widgets have a transform, a size, and a list of children. The transform is
+--- always a RelativeTransform with the parent widget's transform as a parent.
 
 local class = require 'class'
 local Component = require 'Component'
@@ -30,20 +29,46 @@ function Widget:_init(parent)
   self.children = {}
   self.child_changed = Event()
 
-  self.started:add_handler(function ()
-    local refresh = function () self.child_changed() end
+  if Widget.is_type_of(parent) then
+    self.transform.parent_transform = parent.transform
+    parent:_add_child(self)
+    self.removed:add_handler(function ()
+      parent:_remove_child(self)
+    end)
+  end
+end
 
-    for _, child in ipairs(self.children) do
-      child.transform.parent_transform = self.transform
-      child.transform.changed:add_handler(refresh)
-      child.size_changed:add_handler(refresh)
-    end
-  end)
+function Widget:_add_child(child)
+  assert(Widget.is_type_of(child))
+  table.insert(self.children, child)
+
+  local refresh = function () self.child_changed() end
+  child.transform.changed:add_handler(refresh)
+  child.size_changed:add_handler(refresh)
+
+  self.child_changed()
+end
+
+function Widget:_remove_child(child)
+  -- only happens when child is destroyed
+  assert(Widget.is_type_of(child))
+  local i = 1
+  while self.children[i] ~= child and i <= #self.children do
+    i = i + 1
+  end
+  if i <= #self.children then
+    table.remove(self.children, i)
+  else
+    error('tried to remove a child that isn\'t in self.children')
+  end
+  self.child_changed()
 end
 
 function Widget:set_size(size)
-  self[_size] = size
-  self.size_changed(self)
+  if self[_size] ~= size then
+    self[_size] = size
+    self.size_changed(self)
+  end
 end
 
 function Widget:get_size()
