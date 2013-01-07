@@ -3,10 +3,10 @@
 
 local class = require 'class'
 local Event = require 'Event'
-local Container = require 'gui.Container'
+local LinearContainer = require 'gui.LinearContainer'
 local TextLabel = require 'gui.TextLabel'
 
-local TextField = class('TextField', Container)
+local TextField = class('TextField', LinearContainer)
 
 function TextField:_init(parent, value)
   self:super(parent)
