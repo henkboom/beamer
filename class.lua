@@ -4,6 +4,7 @@ local function class(name, base)
   assert(base == nil or type(base) == 'table', 'invalid base class')
 
   local c = {}
+  local c_mt
 
   if base then
     for k,v in pairs(base) do
@@ -22,6 +23,7 @@ local function class(name, base)
       end
     end
   else
+    c._base = false
     c._ctor = function (obj, ...)
       if c._init then
         c._init(obj, ...)
@@ -78,7 +80,14 @@ local function class(name, base)
   end
 
   c.is_type_of = function (value)
-    return getmetatable(value) == c
+    local object_class = getmetatable(value)
+    while object_class do
+      if object_class == c then
+        return true
+      end
+      object_class = object_class._base
+    end
+    return false
   end
 
   c.seal = function(self)
