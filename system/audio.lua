@@ -26,6 +26,7 @@ if system.platform == 'android' then
 
 else -- assume desktop otherwise
 
+  local ffi = require 'ffi'
   local pa = require 'bindings.portaudio'
 
   local buffer_size = 2048
@@ -77,3 +78,5 @@ else -- assume desktop otherwise
   end
 
 end
+
+return audio

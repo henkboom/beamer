@@ -49,13 +49,19 @@ function audio_control.play()
   linda:set('current_time', 0)
 
   lane = lanes.gen('*', function()
-    require('audio.audio_thread')(linda)
+    local status, err = xpcall(function ()
+      require('audio.audio_thread')(linda)
+    end, debug.traceback)
+    if not status then
+      require('system.logging').log(err)
+      error(err)
+    end
   end)()
 end
 
 function audio_control.stop()
-  linda:send('audio_thread',
-    {0, message_types.stop})
+  --linda:send('audio_thread',
+  --  {0, message_types.stop})
   local _ = lane[0]
   return
 end
