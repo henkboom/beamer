@@ -8,8 +8,9 @@ return blueprint('Root', 'Game', {
   -- resources
   {'resources', '{}'},
 
-  -- main rendering
   {'render_list', {'graphics.RenderList'}},
+
+  -- main rendering
   {'camera', {'graphics.Camera', 'self'}},
   {'camera.transform', {'Transform',
     {'Vector', 0, 0, 0},
@@ -39,6 +40,8 @@ return blueprint('Root', 'Game', {
   {'gui_camera.clear_color', false},
 
   {'widget_manager', {'gui.WidgetManager', 'self'}},
+  {'blueprint_view',
+    {'gui.BlueprintView', 'self.widget_manager.root', 'require "Track"'}},
 
   -- player
   {'player_ship', {'PlayerShip', 'self'}},

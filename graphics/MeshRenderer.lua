@@ -19,12 +19,14 @@ function MeshRenderer:_init(parent)
   self.mesh = false
   self.material = false
 
-  self.render_lists = {self.game.render_list}
+  self.render_lists = false
 
   self.started:add_handler(function ()
     self.transform = self.transform or Transform()
     assert(self.mesh, 'missing mesh')
     assert(self.material, 'missing material')
+
+    self.render_lists = self.render_lists or {self.game.render_list}
 
     -- add job to render list
     local job = RenderJob(function (camera) self:_render(camera) end)

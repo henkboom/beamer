@@ -7,7 +7,7 @@ while restarting do
   restarting = false
 
   local glfw = require 'bindings.glfw'
-  local game = require('Root')()
+  local game = require((...) or 'Root')()
 
   local released = false
   game.events.update:add_handler(function ()

@@ -22,7 +22,6 @@ function WidgetManager:_init(parent)
 
   -- for testing
   self.root = Widget(self)
-  BlueprintView(self.root, require 'Track')
 
   self:add_handler_for('handle_event')
 end
