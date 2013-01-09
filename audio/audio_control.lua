@@ -6,6 +6,7 @@ local audio_control = {}
 local linda = lanes.linda()
 local lane
 
+-- TODO: less copypasta
 audio_control.operator_count = 192
 
 local message_types = {
@@ -13,11 +14,11 @@ local message_types = {
   stop = 0,
   -- in input stream only: add all preceding messages to the queue now
   flush = 1,
-  -- set the frequency line of an operator (op_index, line_a, line_b)
+  -- set the frequency line of an operator (op_index, value, ramp_time)
   operator_frequency = 2,
   -- set the phase of an operator (op_index, phase)
   operator_phase = 3,
-  -- set a modulation (op1_index, op2_index, line_a, line_b)
+  -- set a modulation (op1_index, op2_index, value, ramp_time)
   modulation = 4,
 }
 
@@ -30,9 +31,9 @@ function audio_control.flush()
     {0, message_types.flush})
 end
 
-function audio_control.set_operator_frequency(time, operator, a, b)
+function audio_control.set_operator_frequency(time, operator, value, ramp_time)
   linda:send('audio_thread',
-    {time, message_types.operator_frequency, {operator, a, b}})
+    {time, message_types.operator_frequency, {operator, value, ramp_time}})
 end
 
 function audio_control.set_operator_phase(time, operator, phase)
@@ -40,9 +41,9 @@ function audio_control.set_operator_phase(time, operator, phase)
     {time, message_types.operator_phase, {operator, phase}})
 end
 
-function audio_control.set_modulation(time, op1, op2, a, b)
+function audio_control.set_modulation(time, op1, op2, value, ramp_time)
   linda:send('audio_thread',
-    {time, message_types.modulation, {op1, op2, a, b}})
+    {time, message_types.modulation, {op1, op2, value, ramp_time}})
 end
 
 function audio_control.play()

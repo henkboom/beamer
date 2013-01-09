@@ -24,14 +24,25 @@ end
 ---- line
 
 -- f(t) = a*t + b
-ffi.cdef [[ typedef struct { double a, b; } line_s; ]]
+ffi.cdef [[ typedef struct { double a, b, endpoint; } line_s; ]]
 local line_s = ffi.metatype('line_s', {
   __index = {
     at = function (self, t)
-      return self.a*t + self.b
+      return self.a*math.min(t, self.endpoint) + self.b
     end
   }
 })
+
+local function line_from_to(time_a, value_a, time_b, value_b)
+  print(time_a, value_a, time_b, value_b)
+  if time_b - time_a == 0 then
+    return line_s(0, value_b, time_b)
+  else
+    local a = (value_b - value_a) / (time_b - time_a)
+    local b = value_a - time_a * a
+    return line_s(a, b, time_b)
+  end
+end
 
 ---- phase modulation operator
 
@@ -82,6 +93,19 @@ local crs_matrix_s = ffi.metatype('crs_matrix_s', {
         end
       end
       self.values[index] = value
+    end,
+
+    get = function (self, row, column)
+      local index = self.row_indices[row]
+      local next_row = self.row_indices[row+1]
+      while column ~= self.value_columns[index] and index < next_row do
+        index = index + 1
+      end
+      if index == next_row then
+        return line_s(0, 0, 1/0)
+      else
+        return self.values[index]
+      end
     end,
 
     multiply = function (self, time, vector, output)
@@ -163,11 +187,11 @@ local message_types = {
   -- in input stream only: add all preceding messages to the queue now
   flush = 1,
 
-  -- set the frequency line of an operator (op_index, line_a, line_b)
+  -- set the frequency line of an operator (op_index, value, ramp_time)
   operator_frequency = 2,
   -- set the phase of an operator (op_index, phase)
   operator_phase = 3,
-  -- set a modulation (op1_index, op2_index, line_a, line_b)
+  -- set a modulation (op1_index, op2_index, value, ramp_time)
   modulation = 4,
 }
 
@@ -235,6 +259,27 @@ local function message_queue_add(self, message)
   end
 end
 
+local function message_queue_filter(self, keep_fn)
+  local previous = nil
+  local node = self.queued
+  while node ~= nil do
+    if keep_fn(node.message) then
+      previous = node
+      node = node.next
+    else
+      if previous ~= nil then
+        previous.next = node.next
+      else
+        self.queued = node.next
+      end
+      local deleted = node
+      node = node.next
+      deleted.next = self.free
+      self.free = deleted
+    end
+  end
+end
+
 local function message_queue_peek(self)
   if self.queued ~= nil then
     return self.queued.message
@@ -257,6 +302,7 @@ end
 message_queue_s = ffi.metatype('message_queue_s', {
   __index = {
     add = message_queue_add,
+    filter = message_queue_filter,
     peek = message_queue_peek,
     remove_first = message_queue_remove_first,
   }
@@ -284,6 +330,32 @@ return function (linda)
         playing = false
       elseif message.type == message_types.flush then
         for i = 1, #inbox do
+          -- negative time values are relative to current time instead of
+          -- absolute (e.g. -10 is 10 samples in the future
+          if inbox[i].time < 0 then
+            inbox[i].time = sample_time * inv_sample_rate - inbox[i].time
+          end
+          -- make sure the time is never negative
+          if inbox[i].time < sample_time * inv_sample_rate then
+            inbox[i].time = sample_time * inv_sample_rate
+          end
+
+          -- operator and modulation messages automatically cancel previously
+          -- set events that are later than them
+          if inbox[i].type == message_types.operator_frequency or
+             inbox[i].type == message_types.operator_phase then
+            messages:filter(function (m)
+              return m.content[0] ~= inbox[i].content[0] or
+                     m.time <= inbox[i].time
+            end)
+          elseif inbox[i].type == message_types.modulation then
+            messages:filter(function (m)
+              return m.content[0] ~= inbox[i].content[0] or
+                     m.content[1] ~= inbox[i].content[1] or
+                     m.time <= inbox[i].time
+            end)
+          end
+
           messages:add(inbox[i])
           inbox[i] = nil
         end
@@ -304,12 +376,24 @@ return function (linda)
       local content = message.content
 
       if message.type == message_types.operator_frequency then
-        c.operators[content[0]].frequency =
-          line_s(content[1], content[2])
+        local line = line_from_to(
+            sample_time * inv_sample_rate,
+            c.operators[content[0]].frequency:at(sample_time * inv_sample_rate),
+            sample_time * inv_sample_rate + content[2],
+            content[1])
+        c.operators[content[0]].frequency = line
+        print('frequency', content[0], line.a, line.b)
       elseif message.type == message_types.operator_phase then
         c.operators[content[0]].phase = content[1]
       elseif message.type == message_types.modulation then
-        c.modulation:set(content[1], content[0], line_s(content[2], content[3]))
+        local old_line = c.modulation:get(content[1], content[0])
+        local line = line_from_to(
+            sample_time * inv_sample_rate,
+            old_line:at(sample_time * inv_sample_rate),
+            sample_time * inv_sample_rate + content[3],
+            content[2])
+        c.modulation:set(content[1], content[0], line)
+        print('modulation', content[0], content[1], line.a, line.b)
       end
 
       message = messages:peek()
