@@ -22,9 +22,9 @@ return blueprint('Root', 'Game', {
   {'camera.projection_mode', '"orthographic"'},
   {'camera.orthographic_height', 25},
 
-  {'postprocess', {'graphics.PostProcess', 'self', 'self.camera'}},
-  {'postprocess.material', {'graphics.Material'}},
-  {'postprocess.material.program', {'shaders.textured'}},
+  --{'postprocess', {'graphics.PostProcess', 'self', 'self.camera'}},
+  --{'postprocess.material', {'graphics.Material'}},
+  --{'postprocess.material.program', {'shaders.textured'}},
 
   -- gui rendering
   {'gui_render_list', {'graphics.RenderList'}},
@@ -40,8 +40,8 @@ return blueprint('Root', 'Game', {
   {'gui_camera.clear_color', false},
 
   {'widget_manager', {'gui.WidgetManager', 'self'}},
-  {'blueprint_view',
-    {'gui.BlueprintView', 'self.widget_manager.root', 'require "Track"'}},
+  --{'blueprint_view',
+  --  {'gui.BlueprintView', 'self.widget_manager.root', 'require "Track"'}},
 
   -- player
   {'player_ship', {'PlayerShip', 'self'}},
