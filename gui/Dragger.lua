@@ -15,6 +15,7 @@ function Dragger:_init(parent)
 
   self.size = Vector(1, 1)
   self.pressed = Event()
+  self.value_changed = Event()
 
   self._renderer = BoxRenderer(self)
   self._renderer.size = self.size
@@ -41,6 +42,7 @@ function Dragger:handle_event(e)
         math.min(math.max(offset.x + e.x, 0), bounds.x),
         math.min(math.max(offset.y + e.y, 0), bounds.y))
       self.transform.local_transform.position = pos
+      self.value_changed()
     end
   end
 end

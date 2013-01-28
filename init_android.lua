@@ -1,21 +1,18 @@
 require 'strict'
+local system = require 'system'
 
-local platform = require 'system'
-platform.init('android')
+system.platform = 'android'
 
 local android = require 'bindings.android'
 local glue = require 'bindings.android_native_app_glue'
-local gl = require 'gl'
-local egl = require 'bindings.egl'
 local ffi = require 'ffi'
-local input = require 'system.input'
 local video = require 'system.video'
 local logging = require 'system.logging'
 
---------
-
 local android_app = ffi.cast('struct android_app*', (...))
-input.android_set_android_app(android_app)
+system.init_android(android_app)
+
+--------
 
 local running = false
 

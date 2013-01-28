@@ -22,6 +22,11 @@ function WidgetManager:_init(parent)
 
   -- for testing
   self.root = Widget(self)
+  local video = self.game.video
+  self.root.size = Vector(video.viewport.x, video.viewport.y)
+  self:add_handler_for(video.viewport_changed, function ()
+    self.root.size = Vector(video.viewport.x, video.viewport.y)
+  end)
 
   self:add_handler_for('handle_event')
 end

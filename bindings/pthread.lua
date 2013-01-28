@@ -1,12 +1,12 @@
---- bindings.pthreads
---- =================
+--- bindings.pthread
+--- ================
 ---
---- FFI bindings to pthreads.
+--- FFI bindings to pthread.
 
 local ffi = require 'ffi'
 local system = require 'system'
 
-local pthreads = ffi.C
+local pthread = ffi.C
 
 ---- android ------------------------------------------------------------------
 
@@ -175,4 +175,4 @@ void  pthread_testcancel(void);
 ]]
 
 
-return pthreads
+return pthread

@@ -31,7 +31,7 @@ if system.platform == 'android' then
 
   function timing.get_time()
     ffi.C.clock_gettime(ffi.C.CLOCK_MONOTONIC, timespec)
-    return timespec.tv_sec + timespec.tv_nsec / 1000000000
+    return tonumber(timespec.tv_sec + timespec.tv_nsec / 1000000000)
   end
 
   function timing.sleep(time_to_sleep)

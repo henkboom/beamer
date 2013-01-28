@@ -18,7 +18,7 @@ if system.platform == 'android' then
 
   function resources.load(filename)
     local asset = android.AAssetManager_open(
-      input.android_app.activity.assetManager,
+      system.android.android_app.activity.assetManager,
       filename,
       android.AASSET_MODE_BUFFER)
 

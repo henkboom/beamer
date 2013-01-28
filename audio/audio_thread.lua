@@ -1,207 +1,27 @@
+local AudioThreadInterface = require 'audio.AudioThreadInterface'
+local conf = require 'audio.conf'
 local ffi = require 'ffi'
+local Line = require 'audio.Line'
+local logging = require 'system.logging'
+local Matrix = require 'audio.Matrix'
+local Message = require 'audio.Message'
+local Synth = require 'audio.Synth'
 
-local sample_rate = 96000
-local inv_sample_rate = 1/sample_rate
+local sample_rate = conf.sample_rate
+local inv_sample_rate = conf.inv_sample_rate
+local operator_count = conf.operator_count
+local channel_count = conf.channel_count
+local modulation_count = conf.modulation_count
+local modulation_output_count = conf.modulation_output_count
 
-local operator_count = 192
-local channel_count = 1
-local modulation_count = operator_count * 2
-local modulation_output_count = operator_count + channel_count
-
----- sine wave
-
-local table_mask = 0x3ff
-local table_size = table_mask + 1;
-local sine_table = ffi.new('double[?]', table_size)
-for i = 0, table_size-1 do
-  sine_table[i] = math.sin(i/table_size * 2 * math.pi)
-end
-
-local function sine_wave(phase)
-  return sine_table[bit.band(phase * table_size, table_mask)]
-end
-
----- line
-
--- f(t) = a*t + b
-ffi.cdef [[ typedef struct { double a, b, endpoint; } line_s; ]]
-local line_s = ffi.metatype('line_s', {
-  __index = {
-    at = function (self, t)
-      return self.a*math.min(t, self.endpoint) + self.b
-    end
-  }
-})
-
-local function line_from_to(time_a, value_a, time_b, value_b)
-  print(time_a, value_a, time_b, value_b)
-  if time_b - time_a == 0 then
-    return line_s(0, value_b, time_b)
-  else
-    local a = (value_b - value_a) / (time_b - time_a)
-    local b = value_a - time_a * a
-    return line_s(a, b, time_b)
-  end
-end
-
----- phase modulation operator
-
-ffi.cdef [[ typedef struct { line_s frequency; double phase; } operator_s; ]]
-local operator_s = ffi.metatype("operator_s", {
-  __index = {
-    process_sample = function(self, time, offset)
-      self.phase = (self.phase + self.frequency:at(time)*inv_sample_rate)
-      return sine_wave(self.phase + offset)
-    end
-  }
-})
- 
----- matrix
-
-ffi.cdef [[
-// compressed-row-storage matrix
-typedef struct {
-  line_s values[192*2];     // modulation_count
-  int value_columns[192*2]; // modulation_count
-  int row_indices[192+1+1]; // modulation_output_count+1
-} crs_matrix_s;
+ffi.cdef[[
+void *malloc(size_t size);
+void free(void *ptr);
 ]]
-
-local crs_matrix_s = ffi.metatype('crs_matrix_s', {
-  __index = {
-    set = function (self, row, column, value)
-      -- find the element
-      local index = self.row_indices[row]
-      local next_row = self.row_indices[row+1]
-      while column ~= self.value_columns[index] or index == next_row do
-        if index == next_row then
-          -- expand the row
-          assert(self.row_indices[modulation_output_count] < modulation_count,
-                 'modulation matrix full')
-          for i = self.row_indices[modulation_output_count], index, -1 do
-            self.values[i+1] = self.values[i]
-            self.value_columns[i+1] = self.value_columns[i]
-          end
-          for i = row+1, modulation_output_count+1 do
-            self.row_indices[i] = self.row_indices[i]+1
-          end
-          next_row = self.row_indices[row+1]
-
-          self.value_columns[index] = column
-        else
-          index = index + 1
-        end
-      end
-      self.values[index] = value
-    end,
-
-    get = function (self, row, column)
-      local index = self.row_indices[row]
-      local next_row = self.row_indices[row+1]
-      while column ~= self.value_columns[index] and index < next_row do
-        index = index + 1
-      end
-      if index == next_row then
-        return line_s(0, 0, 1/0)
-      else
-        return self.values[index]
-      end
-    end,
-
-    multiply = function (self, time, vector, output)
-      for row = 0, modulation_output_count-1 do
-        local val = 0
-        for i = self.row_indices[row], self.row_indices[row+1]-1 do
-          val = val + self.values[i]:at(time) * vector[self.value_columns[i]]
-        end
-        output[row] = val
-      end
-    end
-  }
-})
-
-local function crs_matrix()
-  return crs_matrix_s()
-end
-
----- synth
-
-ffi.cdef [[
-typedef struct {
-  operator_s operators[192];       // operator_count
-  crs_matrix_s modulation;
-  double buffer[192];              // operator_count
-  double modulation_buffer[192+1]; // modulation_output_count
-} synth_s;
-]]
-
-local synth_s = ffi.typeof('synth_s')
-
-local sample_bytes = ffi.sizeof('double')
-
-local function synth()
-  local self = synth_s()
-
-  ffi.fill(self.buffer, operator_count * sample_bytes)
-
-  self.modulation = crs_matrix()
-
-  return self
-end
-
-local function synth_process_buffer(self, output, first, last)
-  for i = first, last do
-    output[i] = self:process_sample()
-  end
-end
-
-local function synth_process_sample(self, time)
-  self.modulation:multiply(time, self.buffer, self.modulation_buffer)
-
-  for i = 0, operator_count-1, 8 do
-    self.buffer[i  ] = self.operators[i  ]:process_sample(time, self.modulation_buffer[i  ])
-    self.buffer[i+1] = self.operators[i+1]:process_sample(time, self.modulation_buffer[i+1])
-    self.buffer[i+2] = self.operators[i+2]:process_sample(time, self.modulation_buffer[i+2])
-    self.buffer[i+3] = self.operators[i+3]:process_sample(time, self.modulation_buffer[i+3])
-    self.buffer[i+4] = self.operators[i+4]:process_sample(time, self.modulation_buffer[i+4])
-    self.buffer[i+5] = self.operators[i+5]:process_sample(time, self.modulation_buffer[i+5])
-    self.buffer[i+6] = self.operators[i+6]:process_sample(time, self.modulation_buffer[i+6])
-    self.buffer[i+7] = self.operators[i+7]:process_sample(time, self.modulation_buffer[i+7])
-  end
-
-  return self.modulation_buffer[operator_count]
-end
-
-ffi.metatype('synth_s', {
-  __index = {
-    process_buffer = synth_process_buffer,
-    process_sample = synth_process_sample,
-  }
-})
 
 ---- message queue
 
-local message_types = {
-  -- in input stream only: stop the audio thread
-  stop = 0,
-  -- in input stream only: add all preceding messages to the queue now
-  flush = 1,
-
-  -- set the frequency line of an operator (op_index, value, ramp_time)
-  operator_frequency = 2,
-  -- set the phase of an operator (op_index, phase)
-  operator_phase = 3,
-  -- set a modulation (op1_index, op2_index, value, ramp_time)
-  modulation = 4,
-}
-
 ffi.cdef [[
-typedef struct {
-  double time;
-  double type;
-  double content[4];
-} message_s;
-
 struct _message_list_s {
   struct _message_list_s *next;
   message_s message;
@@ -215,7 +35,6 @@ typedef struct {
 } message_queue_s;
 ]]
 
-local message_s = ffi.typeof('message_s')
 local message_queue_s
 
 local message_buffer_length = 1024
@@ -308,27 +127,27 @@ message_queue_s = ffi.metatype('message_queue_s', {
   }
 })
 
-local audio = require 'system.audio'
+-- actual audio processing callback starts here
 
-return function (linda)
-  print('audio thread started')
-  local c = synth()
-  local inbox = {}
-  local messages = message_queue()
+local c = Synth()
+local inbox = {}
+local messages = message_queue()
+local sample_time = 0
 
-  audio.init()
+return function (user_data, output, frame_count)
+  local audio_thread_interface = AudioThreadInterface.from_pointer(user_data)
 
   local playing = true
+  local output_index = 0
 
-  local sample_time = 0
-  while playing do
+  while playing and output_index < frame_count do
     -- get incoming messages and queue them up
-    local message = linda:receive(0, 'audio_thread')
+    local message = audio_thread_interface:receive_message()
     while message do
-      message = message_s(unpack(message))
-      if message.type == message_types.stop then
+      if message.type == Message.types.stop then
         playing = false
-      elseif message.type == message_types.flush then
+        ffi.C.free(message)
+      elseif message.type == Message.types.flush then
         for i = 1, #inbox do
           -- negative time values are relative to current time instead of
           -- absolute (e.g. -10 is 10 samples in the future
@@ -342,13 +161,13 @@ return function (linda)
 
           -- operator and modulation messages automatically cancel previously
           -- set events that are later than them
-          if inbox[i].type == message_types.operator_frequency or
-             inbox[i].type == message_types.operator_phase then
+          if inbox[i].type == Message.types.operator_frequency or
+             inbox[i].type == Message.types.operator_phase then
             messages:filter(function (m)
               return m.content[0] ~= inbox[i].content[0] or
                      m.time <= inbox[i].time
             end)
-          elseif inbox[i].type == message_types.modulation then
+          elseif inbox[i].type == Message.types.modulation then
             messages:filter(function (m)
               return m.content[0] ~= inbox[i].content[0] or
                      m.content[1] ~= inbox[i].content[1] or
@@ -356,13 +175,15 @@ return function (linda)
             end)
           end
 
-          messages:add(inbox[i])
+          messages:add(inbox[i][0])
+          ffi.C.free(inbox[i])
           inbox[i] = nil
         end
+        ffi.C.free(message)
       else
         table.insert(inbox, message)
       end
-      message = linda:receive(0, 'audio_thread')
+      message = audio_thread_interface:receive_message()
     end
 
     -- process messages that are due
@@ -375,25 +196,25 @@ return function (linda)
 
       local content = message.content
 
-      if message.type == message_types.operator_frequency then
-        local line = line_from_to(
+      if message.type == Message.types.operator_frequency then
+        local line = Line(
             sample_time * inv_sample_rate,
             c.operators[content[0]].frequency:at(sample_time * inv_sample_rate),
             sample_time * inv_sample_rate + content[2],
             content[1])
         c.operators[content[0]].frequency = line
-        print('frequency', content[0], line.a, line.b)
-      elseif message.type == message_types.operator_phase then
+        --print('frequency', content[0], line.a, line.b)
+      elseif message.type == Message.types.operator_phase then
         c.operators[content[0]].phase = content[1]
-      elseif message.type == message_types.modulation then
+      elseif message.type == Message.types.modulation then
         local old_line = c.modulation:get(content[1], content[0])
-        local line = line_from_to(
+        local line = Line(
             sample_time * inv_sample_rate,
             old_line:at(sample_time * inv_sample_rate),
             sample_time * inv_sample_rate + content[3],
             content[2])
         c.modulation:set(content[1], content[0], line)
-        print('modulation', content[0], content[1], line.a, line.b)
+        --print('modulation', content[0], content[1], line.a, line.b)
       end
 
       message = messages:peek()
@@ -405,25 +226,34 @@ return function (linda)
     if message and samples_until_next_message < 1 then
       samples_until_next_message = 1
     end
-    if not message or samples_until_next_message > 512 then
-      samples_until_next_message = 512
+    --if not message or samples_until_next_message > 512 then
+    --  samples_until_next_message = 512
+    --end
+    --samples_until_next_message = math.ceil(samples_until_next_message)
+    if message then
+      samples_until_next_message =
+        math.min(samples_until_next_message, frame_count - output_index)
+    else
+      samples_until_next_message = frame_count - output_index
     end
-    samples_until_next_message = math.ceil(samples_until_next_message)
 
     -- set the 'current time' to the soonest possible time we could handle new
     -- messages
-    linda:set('current_time',
-      inv_sample_rate * (sample_time + samples_until_next_message))
+    --linda:set('current_time',
+    --  inv_sample_rate * (sample_time + samples_until_next_message))
 
     for i = 1, samples_until_next_message do
       local sample = c:process_sample(sample_time * inv_sample_rate)
-      audio.put_sample(sample)
+      output[output_index] = math.floor(-0x8000 + 0xffff * (1+sample)/2 + 0.5)
+      output_index = output_index + 1
       sample_time = sample_time + 1
     end
   end
 
-  audio.uninit()
+  while output_index < frame_count do
+    output[output_index] = 0
+    output_index = output_index + 1
+  end
 
-  print('audio thread stopped')
+  return playing
 end
-

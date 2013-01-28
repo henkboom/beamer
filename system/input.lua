@@ -84,12 +84,6 @@ if system.platform == 'android' then
   -- track current positions of pointers
   local pointer_states = {}
 
-  -- TODO this should probably be refactored since its needed from
-  -- system/resources
-  function input.android_set_android_app(new_android_app)
-    input.android_app = new_android_app
-  end
-
   local function handle_command (_, cmd)
     -- ignored for now:
     -- APP_CMD_SAVE_STATE
@@ -104,7 +98,7 @@ if system.platform == 'android' then
       require('system.video').uninit()
       table.insert(events, kill())
     elseif cmd == glue.APP_CMD_CONTENT_RECT_CHANGED then
-      local rect = input.android_app.contentRect
+      local rect = system.android.android_app.contentRect
       local w, h = rect.right-rect.left, rect.bottom-rect.top
       logging.log('resize', rect.left, rect.top, w, h)
       table.insert(events, resize(rect.left, rect.top, w, h))
@@ -185,14 +179,12 @@ if system.platform == 'android' then
   end
 
   function input.init()
-    assert(input.android_app,
-      'android system.input not initialized with android_app')
-    input.android_app.onAppCmd = handle_command
-    input.android_app.onInputEvent = handle_input
+    system.android.android_app.onAppCmd = handle_command
+    system.android.android_app.onInputEvent = handle_input
 
     -- if the width and height are nonzero we're using a preexisting window and
     -- won't get a proper resize event, so synthesize one
-    local rect = input.android_app.contentRect
+    local rect = system.android.android_app.contentRect
     local w, h = rect.right-rect.left, rect.bottom-rect.top
     if w ~= 0 and h ~= 0 then
       logging.log('init resize', rect.left, rect.top, w, h)
@@ -203,17 +195,19 @@ if system.platform == 'android' then
   function input.poll_events()
     -- TODO why doesn't the jit.off(input.poll_events) work well enough?
     jit.off()
+    --logging.log('poll_events')
     local poll_source = ffi.new('struct android_poll_source*[1]')
     local ret = android.ALooper_pollAll(
       0, nil, nil, ffi.cast('void**', poll_source))
     while ret >= 0 do
       if poll_source[0] ~= nil then
-        poll_source[0].process(input.android_app, poll_source[0])
+        poll_source[0].process(system.android.android_app, poll_source[0])
       end
 
       ret = android.ALooper_pollAll(
         0, nil, nil, ffi.cast('void**', poll_source))
     end
+    --logging.log('poll_events done')
     jit.on()
   end
   -- turn off jit compilation because ALooper_poll* can call back into lua
