@@ -9,7 +9,6 @@ local Material = require 'graphics.Material'
 local Mesh = require 'graphics.Mesh'
 local MeshRenderer = require 'graphics.MeshRenderer'
 local font = require 'font'
-local text_shader = require 'shaders.text'
 local Texture = require 'graphics.Texture'
 local Transform = require 'Transform'
 local Vector = require 'Vector'
@@ -93,13 +92,10 @@ function TextRenderer:_init(parent)
   self.transform = false
 
   self._renderer = MeshRenderer(self)
-  self._renderer.material = Material()
-  self._renderer.material.blend_src = 'src_alpha'
-  self._renderer.material.blend_dst = 'one_minus_src_alpha'
-  if not shader_cache then
-    shader_cache = text_shader()
+  if not material_cache then
+    material_cache = require('materials.Text')()
   end
-  self._renderer.material.program = shader_cache
+  self._renderer.material = material_cache
   self._renderer.mesh = Mesh()
 
   self.removed:add_handler(function ()

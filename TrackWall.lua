@@ -24,8 +24,7 @@ function TrackWall:_init(parent)
   self.curve = false
 
   self._renderer = MeshRenderer(self)
-  self._renderer.material = Material()
-  self._renderer.material.program = require('shaders.basic')()
+  self._renderer.material = require('materials.Basic')()
   self.started:add_handler(function ()
     assert(self.curve, 'missing curve')
     

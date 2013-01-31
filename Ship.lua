@@ -5,8 +5,7 @@ return blueprint('Ship', 'Component', {
   {'ship_motion', {'ShipMotion', 'self'}},
   {'renderer', {'graphics.MeshRenderer', 'self'}},
   {'renderer.transform', 'self.transform'},
-  {'renderer.material', {'graphics.Material'}},
-  {'renderer.material.program', {'shaders.basic'}},
+  {'renderer.material', {'materials.Basic'}},
   {'renderer.mesh', {'graphics.Mesh', {{
     elements = {0,1,2, 2,3,0},
     position = {

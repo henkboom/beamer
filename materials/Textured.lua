@@ -1,16 +1,18 @@
+local Material = require 'graphics.Material'
 local Program = require 'graphics.Program'
 local Shader = require 'graphics.Shader'
 local gl = require 'gl'
 
 return function ()
+  local self = Material()
+
   local vertex = Shader(gl.GL_VERTEX_SHADER)
   assert(vertex:load_from_string(Shader.prelude, [=[
     uniform mat4 projection;
     uniform mat4 modelview;
+    
     attribute vec3 position;
-    attribute vec2 tex_coord;
-
-    varying vec2 f_tex_coord;
+    varying vec4 color;
      
     void main(void)
     {
@@ -22,8 +24,6 @@ return function ()
   local fragment = Shader(gl.GL_FRAGMENT_SHADER)
   assert(fragment:load_from_string(Shader.prelude, [=[
     uniform sampler2D tex;
-
-    varying vec2 f_tex_coord;
     
     void main(void)
     {
@@ -31,10 +31,10 @@ return function ()
     }
   ]=]))
   
-  local program = Program()
-  program:attach_shader(vertex)
-  program:attach_shader(fragment)
-  assert(program:link())
-  
-  return program
+  self.program = Program()
+  self.program:attach_shader(vertex)
+  self.program:attach_shader(fragment)
+  assert(self.program:link())
+
+  return self
 end

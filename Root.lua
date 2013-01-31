@@ -23,8 +23,7 @@ return blueprint('Root', 'Game', {
   {'camera.orthographic_height', 25},
 
   --{'postprocess', {'graphics.PostProcess', 'self', 'self.camera'}},
-  --{'postprocess.material', {'graphics.Material'}},
-  --{'postprocess.material.program', {'shaders.textured'}},
+  --{'postprocess.material', {'materials.Textured'}},
 
   -- gui rendering
   {'gui_render_list', {'graphics.RenderList'}},

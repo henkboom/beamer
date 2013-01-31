@@ -3,10 +3,8 @@
 
 local class = require 'class'
 local Component = require 'Component'
-local Material = require 'graphics.Material'
 local Mesh = require 'graphics.Mesh'
 local MeshRenderer = require 'graphics.MeshRenderer'
-local basic_shader = require 'shaders.basic'
 local Transform = require 'Transform'
 local Vector = require 'Vector'
 
@@ -17,8 +15,7 @@ function BoxRenderer:_init(parent)
 
   self.transform = false
   self._renderer = MeshRenderer(self)
-  self._renderer.material = Material()
-  self._renderer.material.program = basic_shader()
+  self._renderer.material = require('materials.Basic')()
   self._renderer.mesh = Mesh()
   
   self._size = Vector(1, 1)

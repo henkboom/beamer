@@ -1,8 +1,11 @@
+local Material = require 'graphics.Material'
 local Program = require 'graphics.Program'
 local Shader = require 'graphics.Shader'
 local gl = require 'gl'
 
 return function ()
+  local self = Material()
+
   local vertex = Shader(gl.GL_VERTEX_SHADER)
   assert(vertex:load_from_string(Shader.prelude, [=[
     uniform mat4 projection;
@@ -28,10 +31,10 @@ return function ()
     }
   ]=]))
   
-  local program = Program()
-  program:attach_shader(vertex)
-  program:attach_shader(fragment)
-  assert(program:link())
-  
-  return program
+  self.program = Program()
+  self.program:attach_shader(vertex)
+  self.program:attach_shader(fragment)
+  assert(self.program:link())
+
+  return self
 end
