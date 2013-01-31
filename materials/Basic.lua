@@ -10,24 +10,25 @@ return function ()
   assert(vertex:load_from_string(Shader.prelude, [=[
     uniform mat4 projection;
     uniform mat4 modelview;
+    uniform vec4 color;
     
     attribute vec3 position;
-    varying vec4 color;
+    varying vec4 f_color;
      
     void main(void)
     {
     	gl_Position = projection * (modelview * vec4(position, 1));
-      color = vec4(1, 1, 1, 1);
+      f_color = color;
     }
   ]=]))
   
   local fragment = Shader(gl.GL_FRAGMENT_SHADER)
   assert(fragment:load_from_string(Shader.prelude, [=[
-    varying vec4 color;
+    varying vec4 f_color;
     
     void main(void)
     {
-        gl_FragColor = color;
+        gl_FragColor = f_color;
     }
   ]=]))
   
@@ -35,6 +36,8 @@ return function ()
   self.program:attach_shader(vertex)
   self.program:attach_shader(fragment)
   assert(self.program:link())
+
+  self.uniforms.color = {1, 1, 1, 1}
 
   return self
 end
