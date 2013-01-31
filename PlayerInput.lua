@@ -29,6 +29,10 @@ function PlayerInput:_init(parent)
   self.b = false
 
   self._delta = 0
+
+  self.pointer_count = 0
+  self.button_left = false
+  self.button_right = false
   
   self.changed = Event()
 
@@ -41,31 +45,31 @@ end
 --local joyaxes = ffi.new('float[?]', axis_count)
 --local joybuttons = ffi.new('unsigned char[?]', button_count)
 
-local pointers_left = {}
-local pointers_right = {}
-
 function PlayerInput:handle_event(event)
-  if event.type == 'pointer_motion' and system.platform == 'android' then
+  if event.type == 'pointer_up' then
+    self.pointer_count = self.pointer_count - 1
+  elseif event.type == 'pointer_down' then
+    self.pointer_count = self.pointer_count + 1
+  elseif event.type == 'pointer_motion' and system.platform == 'android' then
     local rect = self.game.video.viewport
     local origin = Vector(rect.x + rect.w/2, rect.y + rect.h/2)
     local old_pos = Vector(event.x-event.dx, event.y-event.dy) - origin
     local pos = Vector(event.x, event.y) - origin
     local angle = math.atan2(pos.y, pos.x) - math.atan2(old_pos.y, old_pos.x)
     angle = (angle + math.pi) % (math.pi * 2) - math.pi
-    self._delta = self._delta + angle * 25
-  end
-  if event.type == 'key_down' then
-    if event.key == 'left' then pointers_left.button = true end
-    if event.key == 'right' then pointers_right.button = true end
+    self._delta = self._delta + angle * 30 / self.pointer_count
+  elseif event.type == 'key_down' then
+    if event.key == 'left' then self.button_left = true end
+    if event.key == 'right' then self.button_right = true end
   elseif event.type == 'key_up' then
-    if event.key == 'left' then pointers_left.button = nil end
-    if event.key == 'right' then pointers_right.button = nil end
+    if event.key == 'left' then self.button_left = false end
+    if event.key == 'right' then self.button_right = false end
   end
 end
 
 function PlayerInput:preupdate()
   self.direction = Vector(
-    (next(pointers_left) and -1 or 0) + (next(pointers_right) and 1 or 0) + self._delta, 0)
+    (self.button_left and -1 or 0) + (self.button_right and 1 or 0) + self._delta, 0)
   self._delta = self._delta * 0.7
 
   self.a = true
