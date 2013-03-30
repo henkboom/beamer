@@ -10,9 +10,22 @@ local Vector = require 'Vector'
 local matrix_type = ffi.typeof('struct { float n[16]; }')
 
 --- ### `Matrix()`
---- Returns a new zero-matrix. Not really useful for external use.
+--- Returns a new zero-matrix.
+---
+--- ### `Matrix(i1, i2, i3, i4, j1, j2, j3, j4, k1, k2, k3, k4, l1, l2, l3, l4)`
+--- Returns a new matrix with columns i, j, k, l.
 local Matrix = setmetatable({}, {
-  __call = function (...) return matrix_type(...) end
+  __call = function (self, ...)
+    local nargs = select('#', ...)
+    assert(nargs == 0 or nargs == 16, 'wrong number of arguments for matrix')
+    local m = matrix_type()
+    if nargs == 16 then
+      for i = 1, 16 do
+        m.n[i-1] = select(i, ...)
+      end
+    end
+    return m
+  end
 })
 
 Matrix.type = matrix_type
