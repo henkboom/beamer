@@ -42,8 +42,13 @@ function Vector.__eq (a, b)
   return a.x==b.x and a.y==b.y and a.z==b.z
 end
 
+local function is_small(num)
+  return math.abs(num) < 1e-15
+end
 function Vector.__tostring (v)
-  return '(' .. v.x .. ', ' .. v.y .. ', ' .. v.z .. ')'
+  return '(' .. (is_small(v.x) and 0 or v.x) .. ', ' ..
+                (is_small(v.y) and 0 or v.y) .. ', ' ..
+                (is_small(v.z) and 0 or v.z) .. ')'
 end
 
 function Vector.dot (a, b)
