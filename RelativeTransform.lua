@@ -91,4 +91,21 @@ function RelativeTransform:set_orientation()
   error('orientation is read-only on RelativeTransform')
 end
 
+-- TODO remove all this copy-paste
+function RelativeTransform:transform_point(point)
+  return self.orientation:rotate_vector(point) + self.position
+end
+
+function RelativeTransform:inverse_transform_point(point)
+  return self.orientation:conjugate():rotate_vector(point - self.position)
+end
+
+function RelativeTransform:transform_direction(direction)
+  return self.orientation:rotate_vector(direction)
+end
+
+function RelativeTransform:inverse_transform_direction(direction)
+  return self.orientation:conjugate():rotate_vector(direction)
+end
+
 return RelativeTransform
