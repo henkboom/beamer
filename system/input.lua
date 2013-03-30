@@ -81,6 +81,9 @@ if system.platform == 'android' then
   local android = require 'bindings.android'
   local glue = require 'bindings.android_native_app_glue'
 
+  local running = false
+  local paused = false
+
   -- track current positions of pointers
   local pointer_states = {}
 
@@ -97,6 +100,13 @@ if system.platform == 'android' then
       -- TODO clean this up a bit
       require('system.video').uninit()
       table.insert(events, kill())
+      running = false
+    elseif cmd == glue.APP_CMD_PAUSE then
+      logging.log('pausing game')
+      paused = true
+    elseif cmd == glue.APP_CMD_RESUME then
+      logging.log('unpausing game')
+      paused = false
     elseif cmd == glue.APP_CMD_CONTENT_RECT_CHANGED then
       local rect = system.android.android_app.contentRect
       local w, h = rect.right-rect.left, rect.bottom-rect.top
@@ -179,6 +189,8 @@ if system.platform == 'android' then
   end
 
   function input.init()
+    running = true
+    paused = false
     system.android.android_app.onAppCmd = handle_command
     system.android.android_app.onInputEvent = handle_input
 
@@ -193,19 +205,23 @@ if system.platform == 'android' then
   end
 
   function input.poll_events()
+    if not running then return end
+
     -- TODO why doesn't the jit.off(input.poll_events) work well enough?
     jit.off()
     --logging.log('poll_events')
     local poll_source = ffi.new('struct android_poll_source*[1]')
     local ret = android.ALooper_pollAll(
-      0, nil, nil, ffi.cast('void**', poll_source))
+      paused and -1 or 0, nil, nil, ffi.cast('void**', poll_source))
     while ret >= 0 do
       if poll_source[0] ~= nil then
         poll_source[0].process(system.android.android_app, poll_source[0])
       end
 
+      if not running then break end
+
       ret = android.ALooper_pollAll(
-        0, nil, nil, ffi.cast('void**', poll_source))
+        paused and -1 or 0, nil, nil, ffi.cast('void**', poll_source))
     end
     --logging.log('poll_events done')
     jit.on()
