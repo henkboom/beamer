@@ -85,17 +85,16 @@ function TextRenderer:set_text(str)
   })
 end
 
-local shader_cache
 function TextRenderer:_init(parent)
   self:super(parent)
 
   self.transform = false
 
   self._renderer = MeshRenderer(self)
-  if not material_cache then
-    material_cache = require('materials.Text')()
+  if not self.game.resources.text_material then
+    self.game.resources.text_material = require('materials.Text')()
   end
-  self._renderer.material = material_cache
+  self._renderer.material = self.game.resources.text_material
   self._renderer.mesh = Mesh()
 
   self.removed:add_handler(function ()
