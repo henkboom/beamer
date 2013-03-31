@@ -57,7 +57,7 @@ function PlayerInput:handle_event(event)
     local pos = Vector(event.x, event.y) - origin
     local angle = math.atan2(pos.y, pos.x) - math.atan2(old_pos.y, old_pos.x)
     angle = (angle + math.pi) % (math.pi * 2) - math.pi
-    self._delta = self._delta + angle * 30 / self.pointer_count
+    self._delta = self._delta + angle * 25 / self.pointer_count
   elseif event.type == 'key_down' then
     if event.key == 'left' then self.button_left = true end
     if event.key == 'right' then self.button_right = true end
