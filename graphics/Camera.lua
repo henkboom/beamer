@@ -10,8 +10,18 @@ local Quaternion = require 'Quaternion'
 
 Camera = class('Camera', Component)
 
--- opengl points in the negative Z axis, we point in the positive Y axis
-local rotation_offset = Quaternion.from_rotation(Vector.i, math.pi/2)
+--local rotation_offset = Quaternion.from_rotation(Vector.j, -math.pi/2 ) *
+--                        Quaternion.from_rotation(Vector.k, -math.pi/2)
+
+-- opengl points in the forwards Z axis (left-handed), we point in the positive
+-- X axis (right-handed).
+-- IMPORTANT: matrix visually transposed in the code since matrices are column-major
+local screen_matrix = Matrix(
+  0, 0,-1, 0, -- game x maps to screen z
+ -1, 0, 0, 0, -- game y maps to screen -x
+  0, 1, 0, 0, -- game z maps to screen y
+  0, 0, 0, 1
+)
 
 function Camera:_init(parent)
   self:super(parent)
@@ -19,8 +29,11 @@ function Camera:_init(parent)
   self.render_lists = false
 
   self.clear_color = {0, 0, 0, 0}
+  self.clear_depth = 1
 
+  -- TODO mark projection matrix as dirty when projection parameters are changed
   self.projection_matrix = Matrix.identity
+  -- TODO mark modelview matrix as dirty when transform is changed
   self.modelview_matrix = Matrix.identity
 
   self.near_clipping_plane = 0.1
@@ -46,6 +59,7 @@ function Camera:_init(parent)
 end
 
 function Camera:draw()
+  -- viewport
   local viewport = self.game.video.viewport
   if self.target_framebuffer then
     self.target_framebuffer:bind()
@@ -55,6 +69,7 @@ function Camera:draw()
                   viewport.w, viewport.h)
   end
 
+  -- projection matrix
   local ratio = viewport.w / viewport.h
   if self.projection_mode == 'perspective' then
     self.projection_matrix =
@@ -71,20 +86,31 @@ function Camera:draw()
       self.far_clipping_plane)
   end
 
-  self.modelview_matrix = Matrix.inverse(Matrix.from_transform(
-    self.transform.position,
-    rotation_offset * self.transform.orientation))
+  -- modelview matrix
+  self.modelview_matrix = screen_matrix *
+    Matrix.inverse(Matrix.from_transform(
+      self.transform.position, self.transform.orientation))
 
-  -- enable depth writing so that the depth buffer clears properly
-  gl.glEnable(gl.GL_DEPTH_TEST)
-  gl.glDepthMask(gl.GL_TRUE)
+  -- clear buffers
+  local clear_mask = 0
 
-  if(self.clear_color) then
+  if self.clear_color then
     gl.glColorMask(gl.GL_TRUE, gl.GL_TRUE, gl.GL_TRUE, gl.GL_TRUE)
     gl.glClearColor(unpack(self.clear_color))
-    gl.glClear(gl.GL_COLOR_BUFFER_BIT + gl.GL_DEPTH_BUFFER_BIT)
-  else
-    gl.glClear(gl.GL_DEPTH_BUFFER_BIT)
+    clear_mask = clear_mask + gl.GL_COLOR_BUFFER_BIT
+  end
+
+  if self.clear_depth then
+    -- enable depth writing to clear the depth buffer
+    gl.glEnable(gl.GL_DEPTH_TEST)
+    -- depth writing is implicitly off when the depth test is, so turn it on
+    gl.glDepthMask(gl.GL_TRUE)
+    gl.glClearDepth(self.clear_depth)
+    clear_mask = clear_mask + gl.GL_DEPTH_BUFFER_BIT
+  end
+
+  if clear_mask ~= 0 then
+    gl.glClear(clear_mask)
   end
 
   local jobs = {}

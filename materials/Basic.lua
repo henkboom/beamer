@@ -39,5 +39,7 @@ return function ()
 
   self.uniforms.color = {1, 1, 1, 1}
 
+  self.depth_func = 'lequal'
+
   return self
 end

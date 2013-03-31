@@ -43,9 +43,9 @@ function Mesh:delete()
 end
 
 --- ### `mesh:set_elements_from_data(data)`
---- Sets the element data for this mesh. This should be an array of vertex
---- indices, each triple representing a triangle. `data` is a table or a cdata
---- containing a native array of GLushort elements.
+--- Sets the element data for this mesh. This should be an array of zero-based
+--- vertex indices, each triple representing a triangle. `data` is a table or a
+--- cdata containing a native array of GLushort elements.
 function Mesh:set_elements_from_data(data)
   assert(type(data) == 'table' or type(data) == 'cdata')
 

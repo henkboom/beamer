@@ -2,7 +2,7 @@ local blueprint = require 'blueprint'
 local Vector = require 'Vector'
 local Quaternion = require 'Quaternion'
 
-return blueprint('Root', 'Game', {
+return blueprint('SoundEffectScene', 'Game', {
   {'video', {'Video', 'self'}},
 
   -- resources
