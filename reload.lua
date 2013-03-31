@@ -33,4 +33,6 @@ reload.pin('strict')
 reload.pin('string')
 reload.pin('table')
 
+reload.pin('Track')
+
 return reload

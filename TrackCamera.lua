@@ -11,5 +11,4 @@ return blueprint('Root', 'graphics.Camera', {
   {'far_clipping_plane', 100},
   {'projection_mode', '"orthographic"'},
   {'orthographic_height', 20},
-  {'axes', {'AxesRenderer', 'self'}}
 })

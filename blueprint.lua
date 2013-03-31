@@ -1,8 +1,3 @@
---- blueprint
---- =========
----
---- An ad hoc, informally-specified, bug-ridden, slow implementation of half of
---- Common Lisp.
 
 local class = require 'class'
 
@@ -66,6 +61,70 @@ local function blueprint(name, base, modifications)
       assign(context, parse_address(modification[1]), eval(context, modification[2]))
     end
   end
+  
+  local output_value
+
+  local function output_table(output, t)
+    table.insert(output, '{')
+    local i = 1
+    while t[i] ~= nil do
+      output_value(output, t[i])
+      table.insert(output, ', ')
+      i = i + 1
+    end
+    for k,v in pairs(t) do
+      if type(k) ~= 'number' or k ~= math.floor(k) then
+        table.insert(output, '[')
+        output_value(output, k)
+        table.insert(output, '] = ')
+        output_value(output, v)
+        table.insert(output, ', ')
+      end
+    end
+    table.insert(output, '}')
+  end
+
+  local function output_number(output, n)
+    table.insert(output, tostring(n))
+  end
+
+  local function output_string(output, s)
+    table.insert(output, string.format('%q', s))
+  end
+
+  function output_value(output, v)
+    if type(v) == 'table' then
+      output_table(output, v)
+    elseif type(v) == 'number' then
+      output_number(output, v)
+    elseif type(v) == 'string' then
+      output_string(output, v)
+    elseif type(v) == 'nil' then
+      table.insert(output, 'nil')
+    else
+      table.insert(output, '???')
+      --error('unknown value ' .. tostring(v))
+    end
+  end
+
+  function blueprint_class.serialize_blueprint_to_string()
+    local output = {}
+    table.insert(output, '-- generated blueprint\n')
+    table.insert(output, 'local blueprint = require \'blueprint\'\n')
+    table.insert(output, string.format('return blueprint(%q, %q, {\n',
+      blueprint_class.name, blueprint_class.base))
+
+    for i = 1, #modifications do
+      table.insert(output, '  ')
+      output_value(output, modifications[i])
+      table.insert(output, ',\n')
+    end
+
+    table.insert(output, '})\n')
+
+    return table.concat(output)
+  end
+
   return blueprint_class
 end
 
