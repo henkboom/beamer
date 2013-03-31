@@ -25,11 +25,14 @@ function WidgetManager:_init(parent)
   local video = self.game.video
   self.root.size = Vector(video.viewport.x, video.viewport.y)
   self:add_handler_for(video.viewport_changed, function ()
-    self.root.size = Vector(video.viewport.x, video.viewport.y)
+    local height = self.game.gui_camera.orthographic_height
+    local ratio = video.viewport.w / video.viewport.h
+    self.root.size = Vector(ratio * height, height)
   end)
 
   self:add_handler_for('handle_event')
 end
+
 
 function WidgetManager:begin_text_entry(fn)
   self:end_text_entry()
